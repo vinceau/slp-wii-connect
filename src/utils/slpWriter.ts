@@ -288,22 +288,13 @@ export class SlpFileWriter {
 
   public endGame(): void {
     // End the stream
-    this.currentFile.on("finish", () => {
-      // Write bytes written
-      const fd = fs.openSync(this.currentFile.path(), "r+");
-      (fs as any).writeSync(fd, this.createUInt32Buffer(this.bytesWritten), 0, "binary", 11);
-      fs.closeSync(fd);
-
-      console.log("Finished writting file.");
-
-      // Clear current file
-      this.currentFile = null;
-
-      // Update file state
-      this.onFileStateChange();
-    });
     this.currentFile.setMetadata(this.metadata);
     this.currentFile.end();
+    console.log("Finished writing file.");
+    // Clear current file
+    this.currentFile = null;
+    // Update file state
+    this.onFileStateChange();
   }
 
   public createInt32Buffer(number: number): Buffer {

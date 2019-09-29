@@ -32,14 +32,16 @@ export class SlpFile extends Writable {
     this.startTime = moment();
     this.filePath = getNewFilePath("./", this.startTime);
     this._initializeNewGame(this.filePath);
+    this.on("finish", () => {
+      // Write bytes written
+      const fd = fs.openSync(this.filePath, "r+");
+      (fs as any).writeSync(fd, createUInt32Buffer(this.rawDataLength), 0, "binary", 11);
+      fs.closeSync(fd);
+    });
   }
 
   public path(): string {
     return this.filePath;
-  }
-
-  public getRawDataLength(): number {
-    return this.rawDataLength;
   }
 
   public setMetadata(metadata: SlpFileMetadata): void {
