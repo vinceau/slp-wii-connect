@@ -4,7 +4,7 @@ import moment, { Moment } from 'moment';
 import { createUInt32Buffer, createInt32Buffer } from './helpers';
 import { Writable, WritableOptions } from 'stream';
 
-const defaultNickname = "unknown";
+const DEFAULT_NICKNAME = "unknown";
 
 export interface SlpFileMetadata {
   consoleNickname?: string;
@@ -14,7 +14,7 @@ export interface SlpFileMetadata {
 
 export class SlpFile extends Writable {
   private filePath: string;
-  private metadata: SlpFileMetadata | null = null;
+  private metadata: SlpFileMetadata;
   private fileStream: WriteStream;
   private rawDataLength = 0;
   private startTime: Moment;
@@ -23,6 +23,12 @@ export class SlpFile extends Writable {
     super(opts);
     this.filePath = filePath;
     this.startTime = moment();
+    this.metadata = {
+      consoleNickname: DEFAULT_NICKNAME,
+      lastFrame: -124,
+      players: {},
+    };
+
     this._initializeNewGame(this.filePath);
     this.on("finish", () => {
       // Write bytes written
@@ -95,7 +101,7 @@ export class SlpFile extends Writable {
     ]);
 
     // write the Console Nickname
-    const consoleNick = this.metadata.consoleNickname || defaultNickname;
+    const consoleNick = this.metadata.consoleNickname || DEFAULT_NICKNAME;
     footer = Buffer.concat([
       footer,
       Buffer.from("U"),
