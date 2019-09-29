@@ -3,6 +3,7 @@ import _ from 'lodash';
 import fs from 'fs';
 import path from 'path';
 import moment, { Moment } from 'moment';
+import { SlpFile, SlpFileMetadata } from './slpFile';
 
 
 // const AllFrames: Array<number> = [];
@@ -15,21 +16,6 @@ export interface SlpFileWriterOptions {
   consoleNick: string;
   onFileStateChange: () => void;
 }
-
-interface SlpFile {
-  // map of command -> payload size
-  payloadSizes: Map<number, number>;
-  previousBuffer: Uint8Array;
-  fullBuffer: Buffer;
-  path: string;
-  writeStream: fs.WriteStream;
-  bytesWritten: number;
-  metadata: {
-    startTime: Moment;
-    lastFrame: number;
-    players: any;
-  };
-};
 
 interface ClientData {
   socket: net.Socket;
@@ -54,17 +40,21 @@ export class SlpFileWriter {
   private onFileStateChange: any;
   private id: number;
   private consoleNick: string;
-  private currentFile: SlpFile;
+  private currentFile: SlpFile | null;
   private statusOutput: any;
   private isRelaying: boolean;
   private clients: Array<ClientData>;
+  private bytesWritten = 0;
+  private metadata: SlpFileMetadata;
+  private previousBuffer: Uint8Array = Buffer.from([]);
+  private fullBuffer: Uint8Array = Buffer.from([]);
+  private payloadSizes = new Map<number, number>();
 
   public constructor(settings: SlpFileWriterOptions) {
     this.folderPath = settings.folderPath;
     this.onFileStateChange = settings.onFileStateChange;
     this.id = settings.id;
     this.consoleNick = settings.consoleNick;
-    this.currentFile = this.getClearedCurrentFile();
     this.statusOutput = {
       status: false,
       timeout: null,
@@ -72,21 +62,9 @@ export class SlpFileWriter {
     this.isRelaying = settings.isRelaying;
     this.clients = [];
     this.manageRelay();
-  }
-
-  public getClearedCurrentFile(): SlpFile {
-    return {
-      payloadSizes: new Map<number, number>(),
-      previousBuffer: Buffer.from([]),
-      fullBuffer: Buffer.from([]),
-      path: null,
-      writeStream: null,
-      bytesWritten: 0,
-      metadata: {
-        startTime: null,
-        lastFrame: -124,
-        players: {},
-      },
+    this.metadata = {
+      lastFrame: -124,
+      players: {},
     };
   }
 
@@ -125,7 +103,7 @@ export class SlpFileWriter {
   }
 
   public getCurrentFilePath(): string {
-    return _.get(this.currentFile, 'path');
+    return this.currentFile.path();
   }
 
   public updateSettings(settings: SlpFileWriterOptions): void {
@@ -148,7 +126,7 @@ export class SlpFileWriter {
       }, timeoutLength);
     }
 
-    if (this.currentFile.metadata.lastFrame < -60) {
+    if (this.metadata.lastFrame < -60) {
       // Only show the source in the later portion of the game loading stage
       return;
     }
@@ -168,7 +146,7 @@ export class SlpFileWriter {
     let isGameEnd = false;
 
     const data = Uint8Array.from(Buffer.concat([
-      this.currentFile.previousBuffer,
+      this.previousBuffer,
       newData,
     ]));
 
@@ -194,12 +172,12 @@ export class SlpFileWriter {
       if (remainingLen < payloadSize + 1) {
         // If remaining length is not long enough for full payload, save the remaining
         // data until we receive more data. The data has been split up.
-        this.currentFile.previousBuffer = data.slice(index);
+        this.previousBuffer = data.slice(index);
         break;
       }
 
       // Clear previous buffer here, dunno where else to do this
-      this.currentFile.previousBuffer = Buffer.from([]);
+      this.previousBuffer = Buffer.from([]);
 
       // Increment by one for the command byte
       index += 1;
@@ -250,10 +228,10 @@ export class SlpFileWriter {
 
     // Write data to relay, we do this after processing in the case there is a new game, we need
     // to have the buffer ready
-    this.currentFile.fullBuffer = Buffer.concat([this.currentFile.fullBuffer, newData]);
+    this.fullBuffer = Buffer.concat([this.fullBuffer, newData]);
 
     if (this.clients) {
-      const buf = this.currentFile.fullBuffer;
+      const buf = this.fullBuffer;
       _.each(this.clients, (client) => {
         client.socket.write(buf.slice(client.readPos));
 
@@ -271,13 +249,12 @@ export class SlpFileWriter {
 
   public writeCommand(command: number, payloadPtr: Uint8Array, payloadLen: number): void {
     // Write data
-    const writeStream = this.currentFile.writeStream;
-    if (!writeStream) {
+    if (!this.currentFile) {
       return;
     }
 
     // Keep track of how many bytes we have written to the file
-    this.currentFile.bytesWritten += (payloadLen + 1);
+    this.bytesWritten += (payloadLen + 1);
 
     const payloadBuf = payloadPtr.slice(0, payloadLen);
     const bufToWrite = Buffer.concat([
@@ -286,45 +263,23 @@ export class SlpFileWriter {
     ]);
 
     try {
-      writeStream.write(bufToWrite);
+      this.currentFile.write(bufToWrite);
     } catch (err) {
       console.error(err);
     }
   }
 
   public initializeNewGame(): void {
-    const startTime = moment();
-    const filePath = this.getNewFilePath(startTime);
-    const writeStream = fs.createWriteStream(filePath, {
-      encoding: 'binary',
+    this.currentFile = new SlpFile({
+      folderPath: "./",
+      consoleNick: "hello",
     });
-
-    const clearFileObj = this.getClearedCurrentFile();
-    this.currentFile = {
-      ...clearFileObj,
-      path: filePath,
-      writeStream: writeStream,
-      metadata: {
-        ...clearFileObj.metadata,
-        startTime: startTime,
-      },
-    };
 
     // Clear clients back to position zero
     this.clients = _.map(this.clients, client => ({
       ...client,
       readPos: 0,
     }));
-
-    const header = Buffer.concat([
-      Buffer.from("{U"),
-      Buffer.from([3]),
-      Buffer.from("raw[$U#l"),
-      Buffer.from([0, 0, 0, 0]),
-    ]);
-    writeStream.write(header);
-
-    console.log(`Creating new file at: ${filePath}`);
   }
 
   public getNewFilePath(m: Moment): string {
@@ -332,135 +287,23 @@ export class SlpFileWriter {
   }
 
   public endGame(): void {
-    const writeStream = this.currentFile.writeStream;
-    if (!writeStream) {
-      // Clear current file
-      this.currentFile = this.getClearedCurrentFile();
-
-      return;
-    }
-
-    let footer = Buffer.concat([
-      Buffer.from("U"),
-      Buffer.from([8]),
-      Buffer.from("metadata{"),
-    ]);
-
-    // Write game start time
-    const startTimeStr = this.currentFile.metadata.startTime.toISOString();
-    footer = Buffer.concat([
-      footer,
-      Buffer.from("U"),
-      Buffer.from([7]),
-      Buffer.from("startAtSU"),
-      Buffer.from([startTimeStr.length]),
-      Buffer.from(startTimeStr),
-    ]);
-
-    // Write last frame index
-    // TODO: Get last frame
-    const lastFrame = this.currentFile.metadata.lastFrame;
-    footer = Buffer.concat([
-      footer,
-      Buffer.from("U"),
-      Buffer.from([9]),
-      Buffer.from("lastFramel"),
-      this.createInt32Buffer(lastFrame),
-    ]);
-
-    // write the Console Nickname
-    const consoleNick = this.consoleNick;
-    footer = Buffer.concat([
-      footer,
-      Buffer.from("U"),
-      Buffer.from([11]),
-      Buffer.from("consoleNickSU"),
-      Buffer.from([consoleNick.length]),
-      Buffer.from(consoleNick),
-    ]);
-
-    // Start writting player specific data
-    footer = Buffer.concat([
-      footer,
-      Buffer.from("U"),
-      Buffer.from([7]),
-      Buffer.from("players{"),
-    ]);
-    const players = this.currentFile.metadata.players;
-    _.forEach(players, (player, index) => {
-      // Start player obj with index being the player index
-      footer = Buffer.concat([
-        footer,
-        Buffer.from("U"),
-        Buffer.from([index.length]),
-        Buffer.from(`${index}{`),
-      ]);
-
-      // Start characters key for this player
-      footer = Buffer.concat([
-        footer,
-        Buffer.from("U"),
-        Buffer.from([10]),
-        Buffer.from("characters{"),
-      ]);
-
-      // Write character usage
-      _.forEach(player.characterUsage, (usage, internalId) => {
-        // Write this character
-        footer = Buffer.concat([
-          footer,
-          Buffer.from("U"),
-          Buffer.from([internalId.length]),
-          Buffer.from(`${internalId}l`),
-          this.createUInt32Buffer(usage),
-        ]);
-      });
-
-      // Close characters and player
-      footer = Buffer.concat([
-        footer,
-        Buffer.from("}}"),
-      ]);
-    });
-
-    // Close players
-    footer = Buffer.concat([
-      footer,
-      Buffer.from("}"),
-    ]);
-
-    // Write played on
-    footer = Buffer.concat([
-      footer,
-      Buffer.from("U"),
-      Buffer.from([8]),
-      Buffer.from("playedOnSU"),
-      Buffer.from([7]),
-      Buffer.from("network"),
-    ]);
-    
-    // Close metadata and file
-    footer = Buffer.concat([
-      footer,
-      Buffer.from("}}"),
-    ]);
-
     // End the stream
-    writeStream.write(footer);
-    writeStream.end(null, null, () => {
+    this.currentFile.on("finish", () => {
       // Write bytes written
-      const fd = fs.openSync(this.currentFile.path, "r+");
-      (fs as any).writeSync(fd, this.createUInt32Buffer(this.currentFile.bytesWritten), 0, "binary", 11);
+      const fd = fs.openSync(this.currentFile.path(), "r+");
+      (fs as any).writeSync(fd, this.createUInt32Buffer(this.bytesWritten), 0, "binary", 11);
       fs.closeSync(fd);
 
       console.log("Finished writting file.");
 
       // Clear current file
-      this.currentFile = this.getClearedCurrentFile();
+      this.currentFile = null;
 
       // Update file state
       this.onFileStateChange();
     });
+    this.currentFile.setMetadata(this.metadata);
+    this.currentFile.end();
   }
 
   public createInt32Buffer(number: number): Buffer {
@@ -480,14 +323,14 @@ export class SlpFileWriter {
     for (let i = 1; i < payloadLen; i += 3) {
       const commandByte = dataView.getUint8(i);
       const payloadSize = dataView.getUint16(i + 1);
-      this.currentFile.payloadSizes.set(commandByte, payloadSize);
+      this.payloadSizes.set(commandByte, payloadSize);
     }
 
     return payloadLen;
   }
 
   public processCommand(command: number, dataView: DataView): number {
-    const payloadSize = this.currentFile.payloadSizes.get(command);
+    const payloadSize = this.payloadSizes.get(command);
     if (!payloadSize) {
       // TODO: Flag some kind of error
       return 0;
@@ -507,7 +350,7 @@ export class SlpFileWriter {
       }
 
       // Update frame index
-      this.currentFile.metadata.lastFrame = frameIndex;
+      this.metadata.lastFrame = frameIndex;
 
       // Update character usage
       const prevPlayer = _.get(this.currentFile, ['metadata', 'players', `${playerIndex}`]) || {};
@@ -521,7 +364,7 @@ export class SlpFileWriter {
         },
       };
 
-      this.currentFile.metadata.players[`${playerIndex}`] = player;
+      this.metadata.players[`${playerIndex}`] = player;
 
       break;
     case WriteCommand.CMD_RECEIVE_GAME_END:
