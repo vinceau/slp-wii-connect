@@ -1,4 +1,6 @@
+import path from "path";
 import _ from 'lodash';
+import moment, { Moment } from 'moment';
 import { SlpFile, SlpFileMetadata } from './slpFile';
 import { SlpRawStream, SlpRawEvent, Command, PostFrameUpdateType } from 'slp-realtime';
 
@@ -50,10 +52,8 @@ export class SlpFileWriter {
   }
 
   private _handleNewGame(): void {
-    this.currentFile = new SlpFile({
-      folderPath: "./",
-      consoleNick: "hello",
-    });
+    const filePath = getNewFilePath(this.folderPath, moment());
+    this.currentFile = new SlpFile(filePath);
   }
 
   private _handlePostFrameUpdate(command: number, payload: PostFrameUpdateType): void {
@@ -94,4 +94,8 @@ export class SlpFileWriter {
     this.currentFile = null;
   }
 
+}
+
+const getNewFilePath = (folder: string, m: Moment): string => {
+  return path.join(folder, `Game_${m.format("YYYYMMDD")}T${m.format("HHmmss")}.slp`);
 }

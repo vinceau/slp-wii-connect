@@ -1,36 +1,28 @@
 import _ from 'lodash';
-import path from "path";
 import fs, { WriteStream } from 'fs';
 import moment, { Moment } from 'moment';
 import { createUInt32Buffer, createInt32Buffer } from './helpers';
 import { Writable, WritableOptions } from 'stream';
 
-
-// const AllFrames: Array<number> = [];
-
-export interface SlpFileWriterOptions {
-  folderPath: string;
-  consoleNick: string;
-}
+const defaultNickname = "unknown";
 
 export interface SlpFileMetadata {
+  consoleNickname?: string;
   lastFrame: number;
   players: any;
 };
 
 export class SlpFile extends Writable {
   private filePath: string;
-  private consoleNick: string;
   private metadata: SlpFileMetadata | null = null;
   private fileStream: WriteStream;
   private rawDataLength = 0;
   private startTime: Moment;
 
-  public constructor(settings: SlpFileWriterOptions, opts?: WritableOptions) {
+  public constructor(filePath: string, opts?: WritableOptions) {
     super(opts);
-    this.consoleNick = settings.consoleNick;
+    this.filePath = filePath;
     this.startTime = moment();
-    this.filePath = getNewFilePath("./", this.startTime);
     this._initializeNewGame(this.filePath);
     this.on("finish", () => {
       // Write bytes written
@@ -103,7 +95,7 @@ export class SlpFile extends Writable {
     ]);
 
     // write the Console Nickname
-    const consoleNick = this.consoleNick;
+    const consoleNick = this.metadata.consoleNickname || defaultNickname;
     footer = Buffer.concat([
       footer,
       Buffer.from("U"),
@@ -182,8 +174,4 @@ export class SlpFile extends Writable {
     // End the stream
     this.fileStream.write(footer, callback);
   }
-}
-
-const getNewFilePath = (folder: string, m: Moment): string => {
-  return path.join(folder, `Game_${m.format("YYYYMMDD")}T${m.format("HHmmss")}.slp`);
 }
