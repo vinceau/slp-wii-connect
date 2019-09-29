@@ -1,6 +1,7 @@
 import net from 'net';
 import _ from 'lodash';
 import { SlpFile, SlpFileMetadata } from './slpFile';
+import { SlpRawStream, SlpRawEvent, Command, PostFrameUpdateType, GameEndType } from 'slp-realtime';
 
 export interface SlpFileWriterOptions {
   targetFolder: string;
@@ -43,6 +44,7 @@ export class SlpFileWriter {
   private previousBuffer: Uint8Array = Buffer.from([]);
   private fullBuffer: Uint8Array = Buffer.from([]);
   private payloadSizes = new Map<number, number>();
+  private rawStream: SlpRawStream;
 
   public constructor(settings: SlpFileWriterOptions) {
     this.folderPath = settings.folderPath;
@@ -60,6 +62,23 @@ export class SlpFileWriter {
       lastFrame: -124,
       players: {},
     };
+    this.rawStream = new SlpRawStream();
+    this.rawStream.on(SlpRawEvent.RAW_COMMAND, (command: Command, buffer: Uint8Array) => {
+      if (this.currentFile !== null) {
+        this.currentFile.write(buffer);
+      }
+    })
+    this.rawStream.on(SlpRawEvent.POST_FRAME_UPDATE, (command: Command, payload: PostFrameUpdateType) => {
+      this._handlePostFrameUpdate(command, payload);
+    })
+    this.rawStream.on(SlpRawEvent.MESSAGE_SIZES, () => {
+      console.log("new game started");
+      this._handleNewGame();
+    })
+    this.rawStream.on(SlpRawEvent.GAME_END, (command: Command, payload: GameEndType) => {
+      console.log("game ended");
+      this._handleEndGame(command, payload);
+    })
   }
 
   public manageRelay(): void {
@@ -135,80 +154,8 @@ export class SlpFileWriter {
     setTimer();
   }
 
-  public handleData(newData: Uint8Array): HandleDataResponse {
-    let isNewGame = false;
-    let isGameEnd = false;
-
-    const data = Uint8Array.from(Buffer.concat([
-      this.previousBuffer,
-      newData,
-    ]));
-
-    const dataView = new DataView(data.buffer);
-
-    let index = 0;
-    while (index < data.length) {
-      if (Buffer.from(data.slice(index, index + 5)).toString() === "HELO\0") {
-        // This is a consequence of the way our network communication works, "HELO" messages are
-        // sent periodically to avoid the timeout logic. Just ignore them.
-        index += 5;
-        continue;
-      }
-
-      // TODO: Here we are parsing slp file data. Seems pretty silly to do this when
-      // TODO: logic already exists in the parser to do it... Should eventually reconcile
-      // TODO: the two.
-
-      // Make sure we have enough data to read a full payload
-      const command = dataView.getUint8(index);
-      const payloadSize = _.get(this.currentFile, ['payloadSizes', command]) || 0;
-      const remainingLen = data.length - index;
-      if (remainingLen < payloadSize + 1) {
-        // If remaining length is not long enough for full payload, save the remaining
-        // data until we receive more data. The data has been split up.
-        this.previousBuffer = data.slice(index);
-        break;
-      }
-
-      // Clear previous buffer here, dunno where else to do this
-      this.previousBuffer = Buffer.from([]);
-
-      // Increment by one for the command byte
-      index += 1;
-
-      // Prepare to write payload
-      const payloadPtr = data.slice(index);
-      const payloadDataView = new DataView(data.buffer, index);
-      let payloadLen = 0;
-
-      switch (command) {
-      case WriteCommand.CMD_RECEIVE_COMMANDS:
-        isNewGame = true;
-        this._handleNewGame();
-        payloadLen = this.processReceiveCommands(payloadDataView);
-        this.writeCommand(command, payloadPtr, payloadLen);
-        this.onFileStateChange();
-        break;
-      case WriteCommand.CMD_RECEIVE_GAME_END:
-        payloadLen = this.processCommand(command, payloadDataView);
-        this.writeCommand(command, payloadPtr, payloadLen);
-        this._handleEndGame();
-        isGameEnd = true;
-        // console.log(AllFrames);
-        break;
-      case WriteCommand.CMD_GAME_START:
-        payloadLen = this.processCommand(command, payloadDataView);
-        this.writeCommand(command, payloadPtr, payloadLen);
-        break;
-      default:
-        payloadLen = this.processCommand(command, payloadDataView);
-        this.writeCommand(command, payloadPtr, payloadLen);
-        this.handleStatusOutput();
-        break;
-      }
-
-      index += payloadLen;
-    }
+  public handleData(newData: Uint8Array): void {
+    this.rawStream.write(newData);
 
     // Write data to relay, we do this after processing in the case there is a new game, we need
     // to have the buffer ready
@@ -223,33 +170,6 @@ export class SlpFileWriter {
         // maybe there's risks with doing this?
         client.readPos = buf.byteLength; // eslint-disable-line
       });
-    }
-
-    return {
-      isNewGame: isNewGame,
-      isGameEnd: isGameEnd,
-    };
-  }
-
-  public writeCommand(command: number, payloadPtr: Uint8Array, payloadLen: number): void {
-    // Write data
-    if (!this.currentFile) {
-      return;
-    }
-
-    // Keep track of how many bytes we have written to the file
-    this.bytesWritten += (payloadLen + 1);
-
-    const payloadBuf = payloadPtr.slice(0, payloadLen);
-    const bufToWrite = Buffer.concat([
-      Buffer.from([command]),
-      payloadBuf,
-    ]);
-
-    try {
-      this.currentFile.write(bufToWrite);
-    } catch (err) {
-      console.error(err);
     }
   }
 
@@ -266,7 +186,41 @@ export class SlpFileWriter {
     }));
   }
 
-  private _handleEndGame(): void {
+  private _handlePostFrameUpdate(command: number, payload: PostFrameUpdateType): void {
+    // Here we need to update some metadata fields
+    const frameIndex = payload.frame;
+    const playerIndex = payload.playerIndex;
+    const isFollower = payload.isFollower;
+    const internalCharacterId = payload.internalCharacterId;
+
+    if (isFollower) {
+      // No need to do this for follower
+      return;
+    }
+
+    // Update frame index
+    this.metadata.lastFrame = frameIndex;
+
+    // Update character usage
+    const prevPlayer = _.get(this.currentFile, ['metadata', 'players', `${playerIndex}`]) || {};
+    const characterUsage = prevPlayer.characterUsage || {};
+    const curCharFrames = characterUsage[internalCharacterId] || 0;
+    const player = {
+      ...prevPlayer,
+      "characterUsage": {
+        ...characterUsage,
+        [internalCharacterId]: curCharFrames + 1,
+      },
+    };
+    this.metadata.players[`${playerIndex}`] = player;
+  }
+
+  private _handleEndGame(command: Command, payload: GameEndType): void {
+    const endMethod = payload.gameEndMethod;
+    if (endMethod !== 7) {
+      this.handleStatusOutput(700);
+    }
+
     // End the stream
     this.currentFile.setMetadata(this.metadata);
     this.currentFile.end();
@@ -277,68 +231,4 @@ export class SlpFileWriter {
     this.onFileStateChange();
   }
 
-  public processReceiveCommands(dataView: DataView): number {
-    const payloadLen = dataView.getUint8(0);
-    for (let i = 1; i < payloadLen; i += 3) {
-      const commandByte = dataView.getUint8(i);
-      const payloadSize = dataView.getUint16(i + 1);
-      this.payloadSizes.set(commandByte, payloadSize);
-    }
-
-    return payloadLen;
-  }
-
-  public processCommand(command: number, dataView: DataView): number {
-    const payloadSize = this.payloadSizes.get(command);
-    if (!payloadSize) {
-      // TODO: Flag some kind of error
-      return 0;
-    }
-
-    switch (command) {
-    case WriteCommand.CMD_RECEIVE_POST_FRAME_UPDATE:
-      // Here we need to update some metadata fields
-      const frameIndex = dataView.getInt32(0);
-      const playerIndex = dataView.getUint8(4);
-      const isFollower = dataView.getUint8(5);
-      const internalCharacterId = dataView.getUint8(6);
-
-      if (isFollower) {
-        // No need to do this for follower
-        break;
-      }
-
-      // Update frame index
-      this.metadata.lastFrame = frameIndex;
-
-      // Update character usage
-      const prevPlayer = _.get(this.currentFile, ['metadata', 'players', `${playerIndex}`]) || {};
-      const characterUsage = prevPlayer.characterUsage || {};
-      const curCharFrames = characterUsage[internalCharacterId] || 0;
-      const player = {
-        ...prevPlayer,
-        "characterUsage": {
-          ...characterUsage,
-          [internalCharacterId]: curCharFrames + 1,
-        },
-      };
-
-      this.metadata.players[`${playerIndex}`] = player;
-
-      break;
-    case WriteCommand.CMD_RECEIVE_GAME_END:
-      const endMethod = dataView.getUint8(0);
-
-      if (endMethod !== 7) {
-        this.handleStatusOutput(700);
-      }
-
-      break;
-    default:
-      // Nothing to do
-      break;
-    }
-    return payloadSize;
-  }
 }
-

@@ -302,11 +302,7 @@ export class ConsoleConnection {
   }
 
   public handleReplayData(data: Uint8Array): void {
-    const result = this.slpFileWriter.handleData(data);
-    if (result.isNewGame) {
-      const curFilePath = this.slpFileWriter.getCurrentFilePath();
-      console.log(`New game at ${curFilePath}`);
-    }
+    this.slpFileWriter.handleData(data);
   }
 
 }
