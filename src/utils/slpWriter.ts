@@ -1,12 +1,6 @@
 import net from 'net';
 import _ from 'lodash';
-import fs from 'fs';
-import path from 'path';
-import moment, { Moment } from 'moment';
 import { SlpFile, SlpFileMetadata } from './slpFile';
-
-
-// const AllFrames: Array<number> = [];
 
 export interface SlpFileWriterOptions {
   targetFolder: string;
@@ -187,20 +181,10 @@ export class SlpFileWriter {
       const payloadDataView = new DataView(data.buffer, index);
       let payloadLen = 0;
 
-
-      // const frame = readInt32(payloadDataView, 0x1);
-      // const event = parseDataView(command, payloadDataView);
-      // if (event) {
-      // AllFrames.push(frame);
-      // console.log(`${frame} ${command}`);
-      // AllFrames.push((event as any).frame);
-      // console.log(`${(event as any).frame} ${command}`);
-      // }
-
       switch (command) {
       case WriteCommand.CMD_RECEIVE_COMMANDS:
         isNewGame = true;
-        this.initializeNewGame();
+        this._handleNewGame();
         payloadLen = this.processReceiveCommands(payloadDataView);
         this.writeCommand(command, payloadPtr, payloadLen);
         this.onFileStateChange();
@@ -208,7 +192,7 @@ export class SlpFileWriter {
       case WriteCommand.CMD_RECEIVE_GAME_END:
         payloadLen = this.processCommand(command, payloadDataView);
         this.writeCommand(command, payloadPtr, payloadLen);
-        this.endGame();
+        this._handleEndGame();
         isGameEnd = true;
         // console.log(AllFrames);
         break;
@@ -269,7 +253,7 @@ export class SlpFileWriter {
     }
   }
 
-  public initializeNewGame(): void {
+  private _handleNewGame(): void {
     this.currentFile = new SlpFile({
       folderPath: "./",
       consoleNick: "hello",
@@ -282,11 +266,7 @@ export class SlpFileWriter {
     }));
   }
 
-  public getNewFilePath(m: Moment): string {
-    return path.join("./", `Game_${m.format("YYYYMMDD")}T${m.format("HHmmss")}.slp`);
-  }
-
-  public endGame(): void {
+  private _handleEndGame(): void {
     // End the stream
     this.currentFile.setMetadata(this.metadata);
     this.currentFile.end();
@@ -295,18 +275,6 @@ export class SlpFileWriter {
     this.currentFile = null;
     // Update file state
     this.onFileStateChange();
-  }
-
-  public createInt32Buffer(number: number): Buffer {
-    const buf = Buffer.alloc(4);
-    buf.writeInt32BE(number, 0);
-    return buf;
-  }
-
-  public createUInt32Buffer(number: number): Buffer {
-    const buf = Buffer.alloc(4);
-    buf.writeUInt32BE(number, 0);
-    return buf;
   }
 
   public processReceiveCommands(dataView: DataView): number {
