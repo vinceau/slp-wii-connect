@@ -56,21 +56,17 @@ export class SlpFileWriter {
   }
 
   private _handlePostFrameUpdate(command: number, payload: PostFrameUpdateType): void {
-    // Here we need to update some metadata fields
-    const frameIndex = payload.frame;
-    const playerIndex = payload.playerIndex;
-    const isFollower = payload.isFollower;
-    const internalCharacterId = payload.internalCharacterId;
-
-    if (isFollower) {
+    if (payload.isFollower) {
       // No need to do this for follower
       return;
     }
 
     // Update frame index
-    this.metadata.lastFrame = frameIndex;
+    this.metadata.lastFrame = payload.frame;
 
     // Update character usage
+    const playerIndex = payload.playerIndex;
+    const internalCharacterId = payload.internalCharacterId;
     const prevPlayer = _.get(this.currentFile, ['metadata', 'players', `${playerIndex}`]) || {};
     const characterUsage = prevPlayer.characterUsage || {};
     const curCharFrames = characterUsage[internalCharacterId] || 0;
