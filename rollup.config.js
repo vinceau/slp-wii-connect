@@ -18,11 +18,13 @@ export default {
     "fs",
     "path",
     "net",
+    "events",
+    "stream",
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.peerDependencies || {}),
   ],
 
-plugins: [
+  plugins: [
     typescript({
       typescript: require('typescript'),
     }),
