@@ -4,6 +4,8 @@ import _ from 'lodash';
 import { SlpFileWriter } from '../utils/slpWriter';
 import { ConsoleCommunication, CommunicationType, CommunicationMessage } from './communication';
 
+const DEFAULT_PORT = 1666;
+
 export enum ConnectionStatus {
   DISCONNECTED = 0,
   CONNECTING = 1,
@@ -153,9 +155,9 @@ export class ConsoleConnection {
     // TODO: to do this
     const client = net.connect({
       host: this.ipAddress,
-      port: this.port || 666,
+      port: this.port || DEFAULT_PORT,
     }, () => {
-      console.log(`Connected to ${this.ipAddress}:${this.port || "666"}!`);
+      console.log(`Connected to ${this.ipAddress}:${this.port || DEFAULT_PORT}!`);
       clearTimeout(this.connectionRetryState.reconnectHandler);
       this.connectionRetryState = this.getDefaultRetryState();
       this.connectionStatus = ConnectionStatus.CONNECTED;
@@ -198,7 +200,7 @@ export class ConsoleConnection {
 
     client.on('timeout', () => {
       // const previouslyConnected = this.connectionStatus === ConnectionStatus.CONNECTED;
-      console.log(`Timeout on ${this.ipAddress}:${this.port || "666"}`);
+      console.log(`Timeout on ${this.ipAddress}:${this.port || DEFAULT_PORT}`);
       client.destroy();
 
       // TODO: Fix reconnect logic
