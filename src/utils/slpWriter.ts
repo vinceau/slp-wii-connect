@@ -5,8 +5,8 @@ import { SlpFile, SlpFileMetadata } from './slpFile';
 import { SlpRawStream, SlpRawEvent, Command, PostFrameUpdateType } from 'slp-realtime';
 
 export interface SlpFileWriterOptions {
-  folderPath: string;
-  consoleNick: string;
+  folderPath?: string;
+  consoleNick?: string;
 }
 
 export class SlpFileWriter {
@@ -43,7 +43,7 @@ export class SlpFileWriter {
   }
 
   public updateSettings(settings: SlpFileWriterOptions): void {
-    this.folderPath = settings.folderPath;
+    this.folderPath = settings.folderPath || this.folderPath;
     this.consoleNick = settings.consoleNick || this.consoleNick;
   }
 

@@ -1,10 +1,15 @@
 import net from 'net';
 import _ from 'lodash';
 
-import { SlpFileWriter } from '../utils/slpWriter';
 import { ConsoleCommunication, CommunicationType, CommunicationMessage } from './communication';
+import { EventEmitter } from 'events';
 
 const DEFAULT_PORT = 1666;
+
+export enum ConnectionEvent {
+  HANDSHAKE = "handshake",
+  DATA = "data"
+}
 
 export enum ConnectionStatus {
   DISCONNECTED = 0,
@@ -16,10 +21,9 @@ export enum ConnectionStatus {
 export interface ConsoleConnectionOptions {
   ipAddress: string;
   port: number;
-  isRelaying: boolean;
 }
 
-interface ConnectionDetails {
+export interface ConnectionDetails {
   gameDataCursor: Uint8Array;
   consoleNick: string;
   version: string;
@@ -36,28 +40,23 @@ interface ConnectionSettings {
   id: number;
   ipAddress: string;
   port: number;
-  targetFolder: string;
-  isRelaying: boolean;
   consoleNick: string;
 }
 
-export class ConsoleConnection {
+export class ConsoleConnection extends EventEmitter {
   private id: number;
   private ipAddress: string;
   private port: number;
-  private isRelaying: boolean;
-  private slpFileWriter: SlpFileWriter;
   private connectionStatus: ConnectionStatus;
   private client: net.Socket;
   private connDetails: ConnectionDetails;
   private connectionRetryState: RetryState;
-  private targetFolder: string;
 
   public constructor(settings: ConsoleConnectionOptions) {
+    super();
     this.id = 0;
     this.ipAddress = settings.ipAddress;
     this.port = settings.port;
-    this.isRelaying = settings.isRelaying;
 
     this.client = null;
     this.connectionStatus = ConnectionStatus.DISCONNECTED;
@@ -68,17 +67,6 @@ export class ConsoleConnection {
       clientToken: 0,
     }
     this.connectionRetryState = this.getDefaultRetryState();
-
-    // Initialize SlpFileWriter for writting files
-    const slpSettings = {
-      targetFolder: this.targetFolder,
-      onFileStateChange: this.fileStateChangeHandler,
-      id: this.id,
-      isRelaying: this.isRelaying,
-      consoleNick: "",
-      folderPath: "./",
-    }
-    this.slpFileWriter = new SlpFileWriter(slpSettings);
   }
 
   public fileStateChangeHandler = (): void => {
@@ -89,8 +77,6 @@ export class ConsoleConnection {
       id: this.id,
       ipAddress: this.ipAddress,
       port: this.port,
-      targetFolder: this.targetFolder,
-      isRelaying: this.isRelaying,
       consoleNick: this.connDetails.consoleNick,
     };
   }
@@ -133,17 +119,11 @@ export class ConsoleConnection {
     // If data is not provided, keep old values
     this.ipAddress = newSettings.ipAddress || this.ipAddress;
     this.port = newSettings.port || this.port;
-    this.targetFolder = newSettings.targetFolder || this.targetFolder;
-    this.isRelaying = _.defaultTo(newSettings.isRelaying, this.isRelaying);
   }
 
   public connect(): void {
     // We need to update settings here in order for any
     // changes to settings to be propagated
-
-    // Update dolphin manager settings
-    const connectionSettings = this.getSettings();
-    this.slpFileWriter.updateSettings(connectionSettings as any);
 
     // Indicate we are connecting
     this.connectionStatus = ConnectionStatus.CONNECTING;
@@ -274,7 +254,7 @@ export class ConsoleConnection {
       // TODO: Need to figure out a better solution for this. There should be no need to have an
       // TODO: active Wii connection for the relay connection to keep itself alive
       const fakeKeepAlive = Buffer.from("HELO\0");
-      this.slpFileWriter.handleData(fakeKeepAlive);
+      this.handleReplayData(fakeKeepAlive);
 
       break;
     case CommunicationType.REPLAY:
@@ -292,10 +272,7 @@ export class ConsoleConnection {
       this.connDetails.consoleNick = message.payload.nick;
       const tokenBuf = Buffer.from(message.payload.clientToken as any);
       this.connDetails.clientToken = tokenBuf.readUInt32BE(0);;
-      // console.log(`Received token: ${this.connDetails.clientToken}`);
-
-      // Update file writer to use new console nick?
-      this.slpFileWriter.updateSettings(this.getSettings() as any);
+      this.emit(ConnectionEvent.HANDSHAKE, this.connDetails);
       break;
     default:
       // Should this be an error?
@@ -304,7 +281,7 @@ export class ConsoleConnection {
   }
 
   public handleReplayData(data: Uint8Array): void {
-    this.slpFileWriter.handleData(data);
+    this.emit(ConnectionEvent.DATA, data);
   }
 
 }
