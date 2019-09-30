@@ -67,8 +67,6 @@ export class SlpFile extends Writable {
       Buffer.from([0, 0, 0, 0]),
     ]);
     this.fileStream.write(header);
-
-    console.log(`Creating new file at: ${filePath}`);
   }
 
   public _final(callback: (error?: Error | null) => void): void {

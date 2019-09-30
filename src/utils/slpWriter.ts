@@ -33,11 +33,9 @@ export class SlpFileWriter {
       this._handlePostFrameUpdate(command, payload);
     })
     this.rawStream.on(SlpRawEvent.MESSAGE_SIZES, () => {
-      console.log("new game started");
       this._handleNewGame();
     })
     this.rawStream.on(SlpRawEvent.GAME_END, () => {
-      console.log("game ended");
       this._handleEndGame();
     })
   }
@@ -54,6 +52,7 @@ export class SlpFileWriter {
   private _handleNewGame(): void {
     const filePath = getNewFilePath(this.folderPath, moment());
     this.currentFile = new SlpFile(filePath);
+    console.log(`Creating new file at: ${filePath}`);
   }
 
   private _handlePostFrameUpdate(command: number, payload: PostFrameUpdateType): void {
@@ -89,7 +88,7 @@ export class SlpFileWriter {
     // End the stream
     this.currentFile.setMetadata(this.metadata);
     this.currentFile.end();
-    console.log("Finished writing file.");
+    console.log(`Finished writing file: ${this.currentFile.path()}`);
     // Clear current file
     this.currentFile = null;
   }
