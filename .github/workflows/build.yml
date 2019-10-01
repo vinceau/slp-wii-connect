@@ -12,14 +12,13 @@ jobs:
         os: [ubuntu-latest, windows-latest, macOS-latest]
     steps:
     - uses: actions/checkout@v1
-    - name: Use Node.js ${{ matrix.node_version }}
+    - name: Use Node.js ${{ matrix.node_version }} on ${{ matrix.os }}
       uses: actions/setup-node@v1
       with:
         version: ${{ matrix.node_version }}
-
-    - name: GitHub Action for Yarn
-      uses: Borales/actions-yarn@1.1.0
-    - name: yarn install, build
+    - name: yarn install and build
       run: |
         yarn install
         yarn run build
+      env:
+        CI: true
