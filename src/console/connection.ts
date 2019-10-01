@@ -8,6 +8,7 @@ const DEFAULT_PORT = 666;
 
 export enum ConnectionEvent {
   HANDSHAKE = "handshake",
+  STATUS_CHANGE = "statusChange",
   DATA = "data"
 }
 
@@ -83,7 +84,7 @@ export class ConsoleConnection extends EventEmitter {
     const retryState = this.connectionRetryState;
     if (retryState.retryCount >= 5) {
       // Stop reconnecting after 5 attempts
-      this.connectionStatus = ConnectionStatus.DISCONNECTED;
+      this._setStatus(ConnectionStatus.DISCONNECTED);
       return;
     }
 
@@ -102,7 +103,7 @@ export class ConsoleConnection extends EventEmitter {
       reconnectHandler: reconnectHandler,
     };
 
-    this.connectionStatus = ConnectionStatus.RECONNECTING;
+    this._setStatus(ConnectionStatus.RECONNECTING);
   }
 
   public editSettings(newSettings: ConnectionSettings): void {
@@ -116,7 +117,7 @@ export class ConsoleConnection extends EventEmitter {
     // changes to settings to be propagated
 
     // Indicate we are connecting
-    this.connectionStatus = ConnectionStatus.CONNECTING;
+    this._setStatus(ConnectionStatus.CONNECTING);
 
     // Prepare console communication obj for talking UBJSON
     const consoleComms = new ConsoleCommunication();
@@ -130,7 +131,7 @@ export class ConsoleConnection extends EventEmitter {
       console.log(`Connected to ${this.ipAddress}:${this.port}!`);
       clearTimeout(this.connectionRetryState.reconnectHandler);
       this._resetRetryState();
-      this.connectionStatus = ConnectionStatus.CONNECTED;
+      this._setStatus(ConnectionStatus.CONNECTED);
 
       const handshakeMsgOut = consoleComms.genHandshakeOut(
         this.connDetails.gameDataCursor, this.connDetails.clientToken
@@ -194,7 +195,7 @@ export class ConsoleConnection extends EventEmitter {
     client.on('close', () => {
       console.log('connection was closed');
       this.client = null;
-      this.connectionStatus = ConnectionStatus.DISCONNECTED;
+      this._setStatus(ConnectionStatus.DISCONNECTED);
 
       // TODO: Fix reconnect logic
       // // After attempting first reconnect, we may still fail to connect, we should keep
@@ -272,6 +273,11 @@ export class ConsoleConnection extends EventEmitter {
 
   private _handleReplayData(data: Uint8Array): void {
     this.emit(ConnectionEvent.DATA, data);
+  }
+
+  private _setStatus(status: ConnectionStatus): void {
+    this.connectionStatus = status;
+    this.emit(ConnectionEvent.STATUS_CHANGE, this.connectionStatus);
   }
 
   private _resetRetryState(): void {
