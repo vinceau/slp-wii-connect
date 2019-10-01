@@ -21,12 +21,8 @@ export interface CommunicationMessage {
 // This class is responsible for handling the communication protocol between the Wii and the
 // desktop app
 export class ConsoleCommunication {
-  private receiveBuf: Buffer;
+  private receiveBuf = Buffer.from([]);
   private messages = new Array<CommunicationMessage>();
-
-  public constructor() {
-    this.receiveBuf = Buffer.from([]);
-  }
 
   public receive(data: Buffer): void {
     this.receiveBuf = Buffer.concat([

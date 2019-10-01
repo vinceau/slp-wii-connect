@@ -1,8 +1,8 @@
 import net from 'net';
+import { EventEmitter } from 'events';
 import _ from 'lodash';
 
 import { ConsoleCommunication, CommunicationType, CommunicationMessage } from './communication';
-import { EventEmitter } from 'events';
 
 const DEFAULT_PORT = 1666;
 
@@ -18,15 +18,22 @@ export enum ConnectionStatus {
   RECONNECTING = 3,
 };
 
-export interface ConsoleConnectionOptions {
+export interface ConnectionDetails {
+  consoleNickname: string;
+  gameDataCursor: Uint8Array;
+  version: string;
+  clientToken: number;
+}
+
+export interface ConnectionSettings {
   ipAddress: string;
   port: number;
 }
 
-export interface ConnectionDetails {
-  gameDataCursor: Uint8Array;
-  version: string;
-  clientToken: number;
+enum CommunicationState {
+  INITIAL = "initial",
+  LEGACY = "legacy",
+  NORMAL = "normal",
 }
 
 interface RetryState {
@@ -35,33 +42,30 @@ interface RetryState {
   reconnectHandler: NodeJS.Timeout;
 }
 
-interface ConnectionSettings {
-  ipAddress: string;
-  port: number;
+const defaultConnectionDetails: ConnectionDetails = {
+  consoleNickname: "unknown",
+  gameDataCursor: Uint8Array.from([0, 0, 0, 0, 0, 0, 0, 0]),
+  version: "",
+  clientToken: 0,
 }
 
 export class ConsoleConnection extends EventEmitter {
   private ipAddress: string;
   private port: number;
-  private connectionStatus: ConnectionStatus;
-  private client: net.Socket;
-  private connDetails: ConnectionDetails;
+  private connectionStatus = ConnectionStatus.DISCONNECTED;
+  private client: net.Socket = null;
+  private connDetails: ConnectionDetails = { ...defaultConnectionDetails };
   private connectionRetryState: RetryState;
-  private consoleNickname = "unknown";
 
-  public constructor(settings: ConsoleConnectionOptions) {
+  public constructor(ip: string, port: number) {
     super();
-    this.ipAddress = settings.ipAddress;
-    this.port = settings.port;
+    this.ipAddress = ip;
+    this.port = port;
+    this._resetRetryState();
+  }
 
-    this.client = null;
-    this.connectionStatus = ConnectionStatus.DISCONNECTED;
-    this.connDetails = {
-      gameDataCursor: Uint8Array.from([0, 0, 0, 0, 0, 0, 0, 0]),
-      version: "",
-      clientToken: 0,
-    }
-    this.connectionRetryState = this.getDefaultRetryState();
+  public getStatus(): ConnectionStatus {
+    return this.connectionStatus;
   }
 
   public getSettings(): ConnectionSettings {
@@ -71,16 +75,8 @@ export class ConsoleConnection extends EventEmitter {
     };
   }
 
-  public getConsoleNickname(): string {
-    return this.consoleNickname;
-  }
-
-  public getDefaultRetryState(): RetryState {
-    return {
-      retryCount: 0,
-      retryWaitMs: 1000,
-      reconnectHandler: null,
-    }
+  public getDetails(): ConnectionDetails {
+    return this.connDetails;
   }
 
   public startReconnect(): void {
@@ -133,7 +129,7 @@ export class ConsoleConnection extends EventEmitter {
     }, () => {
       console.log(`Connected to ${this.ipAddress}:${this.port || DEFAULT_PORT}!`);
       clearTimeout(this.connectionRetryState.reconnectHandler);
-      this.connectionRetryState = this.getDefaultRetryState();
+      this._resetRetryState();
       this.connectionStatus = ConnectionStatus.CONNECTED;
 
       const handshakeMsgOut = consoleComms.genHandshakeOut(
@@ -150,15 +146,15 @@ export class ConsoleConnection extends EventEmitter {
 
     client.setTimeout(20000);
 
-    let commState = "initial";
+    let commState: CommunicationState = CommunicationState.INITIAL;
     client.on('data', (data) => {
-      if (commState === "initial") {
-        commState = this.getInitialCommState(data);
+      if (commState === CommunicationState.INITIAL) {
+        commState = this._getInitialCommState(data);
         console.log(`Connected to source with type: ${commState}`);
         console.log(data.toString("hex"));
       }
 
-      if (commState === "legacy") {
+      if (commState === CommunicationState.LEGACY) {
         // If the first message received was not a handshake message, either we
         // connected to an old Nintendont version or a relay instance
         this._handleReplayData(data);
@@ -169,7 +165,7 @@ export class ConsoleConnection extends EventEmitter {
       const messages = consoleComms.getMessages();
 
       // Process all of the received messages
-      _.forEach(messages, message => this.processMessage(message));
+      _.forEach(messages, message => this._processMessage(message));
     });
 
     client.on('timeout', () => {
@@ -224,9 +220,9 @@ export class ConsoleConnection extends EventEmitter {
     }
   }
 
-  public getInitialCommState(data: Buffer): string {
+  private _getInitialCommState(data: Buffer): CommunicationState {
     if (data.length < 13) {
-      return "legacy";
+      return CommunicationState.LEGACY;
     }
 
     const openingBytes = Buffer.from([
@@ -235,10 +231,10 @@ export class ConsoleConnection extends EventEmitter {
 
     const dataStart = data.slice(4, 13);
 
-    return dataStart.equals(openingBytes) ? "normal" : "legacy";
+    return dataStart.equals(openingBytes) ? CommunicationState.NORMAL : CommunicationState.LEGACY;
   }
 
-  public processMessage(message: CommunicationMessage): void {
+  private _processMessage(message: CommunicationMessage): void {
     switch (message.type) {
     case CommunicationType.KEEP_ALIVE:
       // console.log("Keep alive message received");
@@ -263,7 +259,7 @@ export class ConsoleConnection extends EventEmitter {
       // console.log("Handshake message received");
       // console.log(message);
 
-      this.consoleNickname = message.payload.nick;
+      this.connDetails.consoleNickname = message.payload.nick;
       const tokenBuf = Buffer.from(message.payload.clientToken as any);
       this.connDetails.clientToken = tokenBuf.readUInt32BE(0);;
       this.emit(ConnectionEvent.HANDSHAKE, this.connDetails);
@@ -278,5 +274,12 @@ export class ConsoleConnection extends EventEmitter {
     this.emit(ConnectionEvent.DATA, data);
   }
 
+  private _resetRetryState(): void {
+    this.connectionRetryState = {
+      retryCount: 0,
+      retryWaitMs: 1000,
+      reconnectHandler: null,
+    };
+  }
 }
 
