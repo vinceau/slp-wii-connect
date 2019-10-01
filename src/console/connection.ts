@@ -37,14 +37,12 @@ interface RetryState {
 }
 
 interface ConnectionSettings {
-  id: number;
   ipAddress: string;
   port: number;
   consoleNick: string;
 }
 
 export class ConsoleConnection extends EventEmitter {
-  private id: number;
   private ipAddress: string;
   private port: number;
   private connectionStatus: ConnectionStatus;
@@ -54,7 +52,6 @@ export class ConsoleConnection extends EventEmitter {
 
   public constructor(settings: ConsoleConnectionOptions) {
     super();
-    this.id = 0;
     this.ipAddress = settings.ipAddress;
     this.port = settings.port;
 
@@ -74,7 +71,6 @@ export class ConsoleConnection extends EventEmitter {
 
   public getSettings(): ConnectionSettings {
     return {
-      id: this.id,
       ipAddress: this.ipAddress,
       port: this.port,
       consoleNick: this.connDetails.consoleNick,
