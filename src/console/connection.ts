@@ -57,10 +57,10 @@ export class ConsoleConnection extends EventEmitter {
   private connDetails: ConnectionDetails = { ...defaultConnectionDetails };
   private connectionRetryState: RetryState;
 
-  public constructor(ip: string, port: number) {
+  public constructor(ip: string, port?: number) {
     super();
     this.ipAddress = ip;
-    this.port = port;
+    this.port = port || DEFAULT_PORT;
     this._resetRetryState();
   }
 
@@ -125,9 +125,9 @@ export class ConsoleConnection extends EventEmitter {
     // TODO: to do this
     const client = net.connect({
       host: this.ipAddress,
-      port: this.port || DEFAULT_PORT,
+      port: this.port,
     }, () => {
-      console.log(`Connected to ${this.ipAddress}:${this.port || DEFAULT_PORT}!`);
+      console.log(`Connected to ${this.ipAddress}:${this.port}!`);
       clearTimeout(this.connectionRetryState.reconnectHandler);
       this._resetRetryState();
       this.connectionStatus = ConnectionStatus.CONNECTED;
