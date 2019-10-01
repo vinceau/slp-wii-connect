@@ -161,7 +161,7 @@ export class ConsoleConnection extends EventEmitter {
       if (commState === "legacy") {
         // If the first message received was not a handshake message, either we
         // connected to an old Nintendont version or a relay instance
-        this.handleReplayData(data);
+        this._handleReplayData(data);
         return;
       }
 
@@ -248,7 +248,7 @@ export class ConsoleConnection extends EventEmitter {
       // TODO: Need to figure out a better solution for this. There should be no need to have an
       // TODO: active Wii connection for the relay connection to keep itself alive
       const fakeKeepAlive = Buffer.from("HELO\0");
-      this.handleReplayData(fakeKeepAlive);
+      this._handleReplayData(fakeKeepAlive);
 
       break;
     case CommunicationType.REPLAY:
@@ -257,7 +257,7 @@ export class ConsoleConnection extends EventEmitter {
       this.connDetails.gameDataCursor = Uint8Array.from(message.payload.pos);
 
       const data = Uint8Array.from(message.payload.data);
-      this.handleReplayData(data);
+      this._handleReplayData(data);
       break;
     case CommunicationType.HANDSHAKE:
       // console.log("Handshake message received");
@@ -274,7 +274,7 @@ export class ConsoleConnection extends EventEmitter {
     }
   }
 
-  public handleReplayData(data: Uint8Array): void {
+  private _handleReplayData(data: Uint8Array): void {
     this.emit(ConnectionEvent.DATA, data);
   }
 
