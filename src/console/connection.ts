@@ -25,7 +25,6 @@ export interface ConsoleConnectionOptions {
 
 export interface ConnectionDetails {
   gameDataCursor: Uint8Array;
-  consoleNick: string;
   version: string;
   clientToken: number;
 }
@@ -39,7 +38,6 @@ interface RetryState {
 interface ConnectionSettings {
   ipAddress: string;
   port: number;
-  consoleNick: string;
 }
 
 export class ConsoleConnection extends EventEmitter {
@@ -49,6 +47,7 @@ export class ConsoleConnection extends EventEmitter {
   private client: net.Socket;
   private connDetails: ConnectionDetails;
   private connectionRetryState: RetryState;
+  private consoleNickname = "unknown";
 
   public constructor(settings: ConsoleConnectionOptions) {
     super();
@@ -59,7 +58,6 @@ export class ConsoleConnection extends EventEmitter {
     this.connectionStatus = ConnectionStatus.DISCONNECTED;
     this.connDetails = {
       gameDataCursor: Uint8Array.from([0, 0, 0, 0, 0, 0, 0, 0]),
-      consoleNick: "unknown",
       version: "",
       clientToken: 0,
     }
@@ -70,8 +68,11 @@ export class ConsoleConnection extends EventEmitter {
     return {
       ipAddress: this.ipAddress,
       port: this.port,
-      consoleNick: this.connDetails.consoleNick,
     };
+  }
+
+  public getConsoleNickname(): string {
+    return this.consoleNickname;
   }
 
   public getDefaultRetryState(): RetryState {
@@ -262,7 +263,7 @@ export class ConsoleConnection extends EventEmitter {
       // console.log("Handshake message received");
       // console.log(message);
 
-      this.connDetails.consoleNick = message.payload.nick;
+      this.consoleNickname = message.payload.nick;
       const tokenBuf = Buffer.from(message.payload.clientToken as any);
       this.connDetails.clientToken = tokenBuf.readUInt32BE(0);;
       this.emit(ConnectionEvent.HANDSHAKE, this.connDetails);
