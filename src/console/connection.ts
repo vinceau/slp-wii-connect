@@ -66,9 +66,6 @@ export class ConsoleConnection extends EventEmitter {
     this.connectionRetryState = this.getDefaultRetryState();
   }
 
-  public fileStateChangeHandler = (): void => {
-  }
-
   public getSettings(): ConnectionSettings {
     return {
       ipAddress: this.ipAddress,
