@@ -4,7 +4,7 @@ import _ from 'lodash';
 
 import { ConsoleCommunication, CommunicationType, CommunicationMessage } from './communication';
 
-const DEFAULT_PORT = 1666;
+const DEFAULT_PORT = 666;
 
 export enum ConnectionEvent {
   HANDSHAKE = "handshake",
