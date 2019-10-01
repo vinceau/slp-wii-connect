@@ -1,1 +1,1 @@
-export { ConsoleConnection, ConnectionEvent, ConnectionDetails } from "./console/connection";
+export * from "./console/connection";
