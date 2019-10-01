@@ -15,11 +15,8 @@ export default {
     },
   ],
   external: [
-    "fs",
-    "path",
     "net",
     "events",
-    "stream",
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.peerDependencies || {}),
   ],
