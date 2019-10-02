@@ -23,6 +23,7 @@ jobs:
     - name: Generate docs
       run: |
         yarn install
+        yarn run build
         yarn run docs
     - name: Publish docs
       uses: peaceiris/actions-gh-pages@v2.4.0
