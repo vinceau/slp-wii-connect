@@ -80,7 +80,7 @@ export class ConsoleConnection extends EventEmitter {
     return this.connDetails;
   }
 
-  public editSettings(newSettings: ConnectionSettings): void {
+  public updateSettings(newSettings: ConnectionSettings): void {
     // If data is not provided, keep old values
     this.ipAddress = newSettings.ipAddress || this.ipAddress;
     this.port = newSettings.port || this.port;
