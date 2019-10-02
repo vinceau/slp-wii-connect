@@ -18,11 +18,15 @@
   "typedocOptions": {
     "mode": "modules",
     "out": "docs",
-    "exclude": "test",
+    "exclude": [
+      "test",
+      "src/index.ts",
+      "src/console/communication.ts"
+    ],
     "theme": "default",
     "ignoreCompilerErrors": true,
     "excludePrivate": true,
-    "excludeNotExported": false,
+    "excludeNotExported": true,
     "target": "ES5",
     "moduleResolution": "node",
     "preserveConstEnums": true,
