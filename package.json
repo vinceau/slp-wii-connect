@@ -16,7 +16,7 @@
     "test": "jest --verbose",
     "coverage": "yarn run test -- --coverage",
     "postcoverage": "open-cli coverage/lcov-report/index.html",
-    "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\"",
     "clean": "rimraf dist",
     "prebuild": "yarn run clean",
     "patch": "npm version patch && npm publish",
