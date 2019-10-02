@@ -50,6 +50,22 @@ const defaultConnectionDetails: ConnectionDetails = {
   clientToken: 0,
 }
 
+/**
+ * Responsible for maintaining connection to a Slippi relay connection or Wii connection.
+ * Events are emitted whenever data is received. See [[ConnectionEvent]] for all available events.
+ *
+ * Basic usage example:
+ *
+ * ```ts
+ * import { ConsoleConnection } from 'slp-wii-connect';
+ *
+ * const connection = ConsoleConnection('123.34.56.78', 666);
+ * connection.on('data', (data) => {
+ *   console.log(`received data: ${data}`);
+ * });
+ * connection.connect();
+ * ```
+ */
 export class ConsoleConnection extends EventEmitter {
   private ipAddress: string;
   private port: number;
@@ -58,6 +74,10 @@ export class ConsoleConnection extends EventEmitter {
   private connDetails: ConnectionDetails = { ...defaultConnectionDetails };
   private connectionRetryState: RetryState;
 
+  /**
+   * @param ip   The IP address of the Wii or Slippi relay.
+   * @param port The port to connect to. Default: 666.
+   */
   public constructor(ip: string, port?: number) {
     super();
     this.ipAddress = ip;
@@ -65,10 +85,16 @@ export class ConsoleConnection extends EventEmitter {
     this._resetRetryState();
   }
 
+  /**
+   * @returns The current connection status.
+   */
   public getStatus(): ConnectionStatus {
     return this.connectionStatus;
   }
 
+  /**
+   * @returns The IP address and port of the current connection.
+   */
   public getSettings(): ConnectionSettings {
     return {
       ipAddress: this.ipAddress,
@@ -76,16 +102,26 @@ export class ConsoleConnection extends EventEmitter {
     };
   }
 
+  /**
+   * @returns The specific details about the connected console.
+   */
   public getDetails(): ConnectionDetails {
     return this.connDetails;
   }
 
+  /**
+   * Updates the IP address and port of the connection.
+   * This only takes effect the next time [[connect]] is called.
+   */
   public updateSettings(newSettings: ConnectionSettings): void {
     // If data is not provided, keep old values
     this.ipAddress = newSettings.ipAddress || this.ipAddress;
     this.port = newSettings.port || this.port;
   }
 
+  /**
+   * Initiate a connection to the Wii or Slippi relay.
+   */
   public connect(): void {
     // We need to update settings here in order for any
     // changes to settings to be propagated
@@ -182,6 +218,9 @@ export class ConsoleConnection extends EventEmitter {
     this.client = client;
   }
 
+  /**
+   * Terminate the current connection.
+   */
   public disconnect(): void {
     const reconnectHandler = this.connectionRetryState.reconnectHandler;
     if (reconnectHandler) {
