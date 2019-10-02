@@ -1,5 +1,6 @@
 # `slp-wii-connect`
 
-[![Build Status](https://github.com/vinceau/slp-wii-connect/workflows/build/badge.svg)](https://github.com/vinceau/slp-wii-connect/actions)
+[![Build Status](https://github.com/vinceau/slp-wii-connect/workflows/build/badge.svg)](https://github.com/vinceau/slp-wii-connect/actions?workflow=build)
 
-Extract Slippi information directly from the Wii.
+Extract Slippi data directly from a Slippi relay or from the Wii using Nintendont Slippi.
+
