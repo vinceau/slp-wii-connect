@@ -26,8 +26,7 @@
     "postpublish": "git push origin master --follow-tags",
     "build": "rollup -c",
     "watch": "rollup -cw",
-    "docs": "typedoc && touch docs/.nojekyll",
-    "publishdocs": "yarn run docs && gh-pages --dotfiles -d docs"
+    "docs": "yarn typedoc && touch docs/.nojekyll && gh-pages --dotfiles -d docs"
   },
   "jest": {
     "testRegex": "/test/.*",
