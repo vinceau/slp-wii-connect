@@ -20,9 +20,16 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - name: Generate and publish docs
+    - name: Generate docs
       run: |
         yarn install
-        yarn run docs
+        yarn typedoc
+        touch ./docs/.nojekyll
+    - name: Publish docs
+      uses: peaceiris/actions-gh-pages@v2.4.0
+      env:
+        ACTIONS_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+        PUBLISH_BRANCH: gh-pages
+        PUBLISH_DIR: ./docs
       env:
         CI: true
