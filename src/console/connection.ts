@@ -80,32 +80,6 @@ export class ConsoleConnection extends EventEmitter {
     return this.connDetails;
   }
 
-  public startReconnect(): void {
-    const retryState = this.connectionRetryState;
-    if (retryState.retryCount >= 5) {
-      // Stop reconnecting after 5 attempts
-      this._setStatus(ConnectionStatus.DISCONNECTED);
-      return;
-    }
-
-    const waitTime = retryState.retryWaitMs;
-    console.log(`Setting reconnect handler with time: ${waitTime}ms`);
-    const reconnectHandler = setTimeout(() => {
-      console.log(`Trying to reconnect after waiting: ${waitTime}ms`);
-      this.connect();
-    }, retryState.retryWaitMs);
-
-    // Prepare next retry state
-    this.connectionRetryState = {
-      ...retryState,
-      retryCount: retryState.retryCount + 1,
-      retryWaitMs: retryState.retryWaitMs * 2,
-      reconnectHandler: reconnectHandler,
-    };
-
-    this._setStatus(ConnectionStatus.RECONNECTING);
-  }
-
   public editSettings(newSettings: ConnectionSettings): void {
     // If data is not provided, keep old values
     this.ipAddress = newSettings.ipAddress || this.ipAddress;
@@ -177,7 +151,7 @@ export class ConsoleConnection extends EventEmitter {
       // TODO: Fix reconnect logic
       // if (this.connDetails.token !== "0x00000000") {
       //   // If previously connected, start the reconnect logic
-      //   this.startReconnect();
+      //   this._startReconnect();
       // }
     });
 
@@ -201,7 +175,7 @@ export class ConsoleConnection extends EventEmitter {
       // // After attempting first reconnect, we may still fail to connect, we should keep
       // // retrying until we succeed or we hit the retry limit
       // if (this.connectionRetryState.retryCount) {
-      //   this.startReconnect();
+      //   this._startReconnect();
       // }
     });
 
@@ -287,5 +261,32 @@ export class ConsoleConnection extends EventEmitter {
       reconnectHandler: null,
     };
   }
+
+  // private _startReconnect(): void {
+  //   const retryState = this.connectionRetryState;
+  //   if (retryState.retryCount >= 5) {
+  //     // Stop reconnecting after 5 attempts
+  //     this._setStatus(ConnectionStatus.DISCONNECTED);
+  //     return;
+  //   }
+
+  //   const waitTime = retryState.retryWaitMs;
+  //   console.log(`Setting reconnect handler with time: ${waitTime}ms`);
+  //   const reconnectHandler = setTimeout(() => {
+  //     console.log(`Trying to reconnect after waiting: ${waitTime}ms`);
+  //     this.connect();
+  //   }, retryState.retryWaitMs);
+
+  //   // Prepare next retry state
+  //   this.connectionRetryState = {
+  //     ...retryState,
+  //     retryCount: retryState.retryCount + 1,
+  //     retryWaitMs: retryState.retryWaitMs * 2,
+  //     reconnectHandler: reconnectHandler,
+  //   };
+
+  //   this._setStatus(ConnectionStatus.RECONNECTING);
+  // }
+
 }
 
