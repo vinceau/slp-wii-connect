@@ -1,10 +1,10 @@
 name: docs
 
-# Only update the docs to whatever's on master
+# Only docs whenever there's a new tag
 on:
   push:
-    branches:
-      - master
+    tags:
+    - '*'
 
 jobs:
   docs:
