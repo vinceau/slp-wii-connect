@@ -191,7 +191,7 @@ export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEm
 
     client.on('timeout', () => {
       // const previouslyConnected = this.connectionStatus === ConnectionStatus.CONNECTED;
-      console.log(`Timeout on ${this.ipAddress}:${this.port || DEFAULT_PORT}`);
+      console.log(`Attempted connection to ${this.ipAddress}:${this.port || DEFAULT_PORT} timed out after ${timeout}ms`);
       client.destroy();
 
       // TODO: Fix reconnect logic
