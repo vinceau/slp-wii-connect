@@ -5,6 +5,7 @@ import StrictEventEmitter from 'strict-event-emitter-types';
 
 import { ConsoleCommunication, CommunicationType, CommunicationMessage } from './communication';
 
+const DEFAULT_CONNECTION_TIMEOUT_MS = 5000;
 const DEFAULT_PORT = 666;
 
 export enum ConnectionStatus {
@@ -127,8 +128,11 @@ export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEm
 
   /**
    * Initiate a connection to the Wii or Slippi relay.
+   * @param timeout Optional. The timeout in milliseconds when attempting to connect
+   *                to the Wii or relay. Default: 5000.
    */
-  public connect(): void {
+  public connect(timeout = DEFAULT_CONNECTION_TIMEOUT_MS): void {
+
     // We need to update settings here in order for any
     // changes to settings to be propagated
 
@@ -161,7 +165,7 @@ export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEm
       client.write(handshakeMsgOut);
     });
 
-    client.setTimeout(20000);
+    client.setTimeout(timeout);
 
     let commState: CommunicationState = CommunicationState.INITIAL;
     client.on('data', (data) => {
