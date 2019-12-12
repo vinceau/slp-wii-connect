@@ -6,6 +6,7 @@ import StrictEventEmitter from 'strict-event-emitter-types';
 import { ConsoleCommunication, CommunicationType, CommunicationMessage } from './communication';
 
 const DEFAULT_CONNECTION_TIMEOUT_MS = 5000;
+const DEFAULT_IP = "0.0.0.0";
 const DEFAULT_PORT = 666;
 
 export enum ConnectionStatus {
@@ -81,14 +82,10 @@ export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEm
   private connDetails: ConnectionDetails = { ...defaultConnectionDetails };
   private connectionRetryState: RetryState;
 
-  /**
-   * @param ip   The IP address of the Wii or Slippi relay.
-   * @param port The port to connect to. Default: 666.
-   */
-  public constructor(ip: string, port?: number) {
+  public constructor() {
     super();
-    this.ipAddress = ip;
-    this.port = port || DEFAULT_PORT;
+    this.ipAddress = DEFAULT_IP;
+    this.port = DEFAULT_PORT;
     this._resetRetryState();
   }
 
@@ -128,10 +125,14 @@ export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEm
 
   /**
    * Initiate a connection to the Wii or Slippi relay.
+   * @param ip   The IP address of the Wii or Slippi relay.
+   * @param port The port to connect to.
    * @param timeout Optional. The timeout in milliseconds when attempting to connect
    *                to the Wii or relay. Default: 5000.
    */
-  public connect(timeout = DEFAULT_CONNECTION_TIMEOUT_MS): void {
+  public connect(ip: string, port: number, timeout = DEFAULT_CONNECTION_TIMEOUT_MS): void {
+    this.ipAddress = ip;
+    this.port = port;
 
     // We need to update settings here in order for any
     // changes to settings to be propagated
