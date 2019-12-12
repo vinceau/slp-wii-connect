@@ -6,6 +6,7 @@ import StrictEventEmitter from 'strict-event-emitter-types';
 import { ConsoleCommunication, CommunicationType, CommunicationMessage } from './communication';
 
 const DEFAULT_CONNECTION_TIMEOUT_MS = 5000;
+const DEFAULT_IP = "0.0.0.0";
 const DEFAULT_PORT = 666;
 
 export enum ConnectionStatus {
@@ -59,18 +60,18 @@ interface ConsoleConnectionEventEmitter {
 
 /**
  * Responsible for maintaining connection to a Slippi relay connection or Wii connection.
- * Events are emitted whenever data is received. See [[ConnectionEvent]] for all available events.
+ * Events are emitted whenever data is received. See [[ConsoleConnectionEvents]] for all available events.
  *
  * Basic usage example:
  *
  * ```ts
  * import { ConsoleConnection } from 'slp-wii-connect';
  *
- * const connection = ConsoleConnection('123.34.56.78', 666);
+ * const connection = ConsoleConnection();
  * connection.on('data', (data) => {
  *   console.log(`received data: ${data}`);
  * });
- * connection.connect();
+ * connection.connect('123.34.56.78', 666);
  * ```
  */
 export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEmitter) {
@@ -81,14 +82,10 @@ export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEm
   private connDetails: ConnectionDetails = { ...defaultConnectionDetails };
   private connectionRetryState: RetryState;
 
-  /**
-   * @param ip   The IP address of the Wii or Slippi relay.
-   * @param port The port to connect to. Default: 666.
-   */
-  public constructor(ip: string, port?: number) {
+  public constructor() {
     super();
-    this.ipAddress = ip;
-    this.port = port || DEFAULT_PORT;
+    this.ipAddress = DEFAULT_IP;
+    this.port = DEFAULT_PORT;
     this._resetRetryState();
   }
 
@@ -128,10 +125,14 @@ export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEm
 
   /**
    * Initiate a connection to the Wii or Slippi relay.
+   * @param ip   The IP address of the Wii or Slippi relay.
+   * @param port The port to connect to.
    * @param timeout Optional. The timeout in milliseconds when attempting to connect
    *                to the Wii or relay. Default: 5000.
    */
-  public connect(timeout = DEFAULT_CONNECTION_TIMEOUT_MS): void {
+  public connect(ip: string, port: number, timeout = DEFAULT_CONNECTION_TIMEOUT_MS): void {
+    this.ipAddress = ip;
+    this.port = port;
 
     // We need to update settings here in order for any
     // changes to settings to be propagated
@@ -191,7 +192,7 @@ export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEm
 
     client.on('timeout', () => {
       // const previouslyConnected = this.connectionStatus === ConnectionStatus.CONNECTED;
-      console.log(`Timeout on ${this.ipAddress}:${this.port || DEFAULT_PORT}`);
+      console.log(`Attempted connection to ${this.ipAddress}:${this.port || DEFAULT_PORT} timed out after ${timeout}ms`);
       client.destroy();
 
       // TODO: Fix reconnect logic
