@@ -71,16 +71,16 @@
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
 						<p>Responsible for maintaining connection to a Slippi relay connection or Wii connection.
-						Events are emitted whenever data is received. See [[ConnectionEvent]] for all available events.</p>
+						Events are emitted whenever data is received. See [[ConsoleConnectionEvents]] for all available events.</p>
 					</div>
 					<p>Basic usage example:</p>
 					<pre><code class="language-ts"><span class="hljs-keyword">import</span> { ConsoleConnection } <span class="hljs-keyword">from</span> <span class="hljs-string">'slp-wii-connect'</span>;
 
-<span class="hljs-keyword">const</span> connection = ConsoleConnection(<span class="hljs-string">'123.34.56.78'</span>, <span class="hljs-number">666</span>);
+<span class="hljs-keyword">const</span> connection = ConsoleConnection();
 connection.on(<span class="hljs-string">'data'</span>, <span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> {
   <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`received data: <span class="hljs-subst">${data}</span>`</span>);
 });
-connection.connect();</code></pre>
+connection.connect(<span class="hljs-string">'123.34.56.78'</span>, <span class="hljs-number">666</span>);</code></pre>
 				</div>
 			</section>
 			<section class="tsd-panel tsd-type-parameters">
@@ -152,36 +152,15 @@ connection.connect();</code></pre>
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Console<wbr>Connection<span class="tsd-signature-symbol">(</span>ip<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, port<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_connection_.consoleconnection.html" class="tsd-signature-type">ConsoleConnection</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Console<wbr>Connection<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_connection_.consoleconnection.html" class="tsd-signature-type">ConsoleConnection</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/57ed383/src/console/connection.ts#L82">connection.ts:82</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/cfd6a14/src/console/connection.ts#L83">connection.ts:83</a></li>
 								</ul>
 							</aside>
-							<div class="tsd-comment tsd-typography">
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>ip: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-											<p>The IP address of the Wii or Slippi relay.</p>
-										</div>
-									</div>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> port: <span class="tsd-signature-type">number</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-											<p>The port to connect to. Default: 666.</p>
-										</div>
-									</div>
-								</li>
-							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="_connection_.consoleconnection.html" class="tsd-signature-type">ConsoleConnection</a></h4>
 						</li>
 					</ul>
@@ -229,13 +208,13 @@ connection.connect();</code></pre>
 					<a name="connect" class="tsd-anchor"></a>
 					<h3>connect</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">connect<span class="tsd-signature-symbol">(</span>timeout<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">connect<span class="tsd-signature-symbol">(</span>ip<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, port<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, timeout<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/57ed383/src/console/connection.ts#L134">connection.ts:134</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/cfd6a14/src/console/connection.ts#L133">connection.ts:133</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -245,6 +224,18 @@ connection.connect();</code></pre>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
+								<li>
+									<h5>ip: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The IP address of the Wii or Slippi relay.</p>
+									</div>
+								</li>
+								<li>
+									<h5>port: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The port to connect to.</p>
+									</div>
+								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> timeout: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;DEFAULT_CONNECTION_TIMEOUT_MS</span></h5>
 									<div class="tsd-comment tsd-typography">
@@ -267,7 +258,7 @@ connection.connect();</code></pre>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/57ed383/src/console/connection.ts#L234">connection.ts:234</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/cfd6a14/src/console/connection.ts#L235">connection.ts:235</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -289,7 +280,7 @@ connection.connect();</code></pre>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/57ed383/src/console/connection.ts#L115">connection.ts:115</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/cfd6a14/src/console/connection.ts#L112">connection.ts:112</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -309,7 +300,7 @@ connection.connect();</code></pre>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/57ed383/src/console/connection.ts#L105">connection.ts:105</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/cfd6a14/src/console/connection.ts#L102">connection.ts:102</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -329,7 +320,7 @@ connection.connect();</code></pre>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/57ed383/src/console/connection.ts#L98">connection.ts:98</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/cfd6a14/src/console/connection.ts#L95">connection.ts:95</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -349,7 +340,7 @@ connection.connect();</code></pre>
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/57ed383/src/console/connection.ts#L123">connection.ts:123</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/cfd6a14/src/console/connection.ts#L120">connection.ts:120</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
