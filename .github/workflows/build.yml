@@ -30,6 +30,9 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
         yarn install
+    - name: Run tests
+      run: |
+        yarn run test
     - name: Build and lint
       run: |
         yarn run build
