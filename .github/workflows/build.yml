@@ -16,9 +16,22 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - name: yarn install and build
+    - name: Cache node modules
+      uses: actions/cache@v1
+      id: cache
+      with:
+        path: node_modules
+        key: ${{ runner.OS }}-build-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.OS }}-build-${{ env.cache-name }}-
+          ${{ runner.OS }}-build-
+          ${{ runner.OS }}-
+    - name: Install dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         yarn install
+    - name: Build and lint
+      run: |
         yarn run build
         yarn run lint
       env:
