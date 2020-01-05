@@ -65,8 +65,238 @@
 				<a href="#codeslp-wii-connectcode" id="codeslp-wii-connectcode" style="color: inherit; text-decoration: none;">
 					<h1><code>slp-wii-connect</code></h1>
 				</a>
-				<p><a href="https://github.com/vinceau/slp-wii-connect/actions?workflow=build"><img src="https://github.com/vinceau/slp-wii-connect/workflows/build/badge.svg" alt="Build Status"></a></p>
-				<p>Extract Slippi data directly from a Slippi relay or from the Wii using Nintendont Slippi.</p>
+				<p><a href="https://npmjs.org/package/@vinceau/slp-wii-connect" title="View this project on npm"><img src="http://img.shields.io/npm/v/@vinceau/slp-wii-connect.svg?style=flat" alt="npm version"></a>
+				<a href="https://github.com/vinceau/slp-wii-connect/actions?workflow=build"><img src="https://github.com/vinceau/slp-wii-connect/workflows/build/badge.svg" alt="Build Status"></a></p>
+				<p>Extract raw <a href="https://github.com/project-slippi/project-slippi">Slippi</a> data directly from the console or from a Slippi relay</p>
+				<a href="#table-of-contents" id="table-of-contents" style="color: inherit; text-decoration: none;">
+					<h2>Table of Contents</h2>
+				</a>
+				<details>
+					<summary><strong>Details</strong></summary>
+					<ul>
+						<li><a href="#installation">Installation</a></li>
+						<li><a href="#usage">Usage</a></li>
+						<li><a href="#api">API</a><ul>
+								<li><a href="#methods">Methods</a><ul>
+										<li><a href="#connectip-port-timeout">connect</a></li>
+										<li><a href="#disconnect">disconnect</a></li>
+										<li><a href="#getstatus">getStatus</a></li>
+										<li><a href="#getsettings">getSettings</a></li>
+										<li><a href="#getdetails">getDetails</a></li>
+									</ul>
+								</li>
+								<li><a href="#events">Events</a><ul>
+										<li><a href="#data">data</a></li>
+										<li><a href="#handshake">handshake</a></li>
+										<li><a href="#statuschange">statusChange</a></li>
+									</ul>
+								</li>
+								<li><a href="#types">Types</a><ul>
+										<li><a href="#connectionsettings">ConnectionSettings</a></li>
+										<li><a href="#connectiondetails">ConnectionDetails</a></li>
+										<li><a href="#connectionstatus">ConnectionStatus</a></li>
+									</ul>
+								</li>
+							</ul>
+						</li>
+						<li><a href="#development">Development</a></li>
+						<li><a href="#acknowledgements">Acknowledgements</a></li>
+						<li><a href="#license">License</a></li>
+					</ul>
+				</details>
+				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
+					<h2>Installation</h2>
+				</a>
+				<p><strong>With NPM</strong></p>
+				<pre><code class="language-bash">npm install @vinceau/slp-wii-connect</code></pre>
+				<p><strong>With Yarn</strong></p>
+				<pre><code class="language-bash">yarn add @vinceau/slp-wii-connect</code></pre>
+				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+					<h2>Usage</h2>
+				</a>
+				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> { ConsoleConnection } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@vinceau/slp-wii-connect"</span>);
+
+<span class="hljs-keyword">const</span> connection = <span class="hljs-keyword">new</span> ConsoleConnection();
+connection.connect(<span class="hljs-string">"133.221.123.111"</span>, <span class="hljs-number">1667</span>);
+
+connection.on(<span class="hljs-string">"data"</span>, (data) =&gt; {
+  <span class="hljs-comment">// Received data from console</span>
+  <span class="hljs-built_in">console</span>.log(data);
+});
+
+connection.on(<span class="hljs-string">"statusChange"</span>, (status) =&gt; {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`status changed: <span class="hljs-subst">${status}</span>`</span>);
+});</code></pre>
+				<a href="#api" id="api" style="color: inherit; text-decoration: none;">
+					<h2>API</h2>
+				</a>
+				<a href="#methods" id="methods" style="color: inherit; text-decoration: none;">
+					<h3>Methods</h3>
+				</a>
+				<a href="#codeconnectip-port-timeoutcode" id="codeconnectip-port-timeoutcode" style="color: inherit; text-decoration: none;">
+					<h4><code>connect(ip, port, [timeout])</code></h4>
+				</a>
+				<p>Attempt connection to a Wii or Slippi relay.</p>
+				<a href="#ip" id="ip" style="color: inherit; text-decoration: none;">
+					<h5>ip</h5>
+				</a>
+				<p>The IP address to connect to.</p>
+				<ul>
+					<li>Required: <code>true</code></li>
+					<li>Type: <code>string</code></li>
+				</ul>
+				<a href="#port" id="port" style="color: inherit; text-decoration: none;">
+					<h5>port</h5>
+				</a>
+				<p>The port to connect through.</p>
+				<ul>
+					<li>Required: <code>true</code></li>
+					<li>Type: <code>number</code></li>
+				</ul>
+				<a href="#timeout" id="timeout" style="color: inherit; text-decoration: none;">
+					<h5>[timeout]</h5>
+				</a>
+				<p>The milliseconds to wait before a connection attempt fails.</p>
+				<ul>
+					<li>Required: <code>false</code></li>
+					<li>Type: <code>number</code></li>
+				</ul>
+				<a href="#codedisconnectcode" id="codedisconnectcode" style="color: inherit; text-decoration: none;">
+					<h4><code>disconnect()</code></h4>
+				</a>
+				<p>Terminates the existing connection.</p>
+				<a href="#codegetstatuscode" id="codegetstatuscode" style="color: inherit; text-decoration: none;">
+					<h4><code>getStatus()</code></h4>
+				</a>
+				<p>Returns <a href="#connectionstatus"><code>ConnectionStatus</code></a>.</p>
+				<a href="#codegetsettingscode" id="codegetsettingscode" style="color: inherit; text-decoration: none;">
+					<h4><code>getSettings()</code></h4>
+				</a>
+				<p>Returns <a href="#connectionsettings"><code>ConnectionSettings</code></a>.</p>
+				<a href="#codegetdetailscode" id="codegetdetailscode" style="color: inherit; text-decoration: none;">
+					<h4><code>getDetails()</code></h4>
+				</a>
+				<p>Returns <a href="#connectiondetails"><code>ConnectionDetails</code></a>.</p>
+				<a href="#events" id="events" style="color: inherit; text-decoration: none;">
+					<h3>Events</h3>
+				</a>
+				<p>You can subscribe to the following events using the <code>connection.on()</code> method. For example:</p>
+				<pre><code class="language-javascript">connection.on(<span class="hljs-string">"data"</span>, (data) =&gt; {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Got the following data: <span class="hljs-subst">${data}</span>`</span>);
+});</code></pre>
+				<a href="#data" id="data" style="color: inherit; text-decoration: none;">
+					<h4>data</h4>
+				</a>
+				<ul>
+					<li><code>(data: Uint8Array) =&gt; void</code></li>
+				</ul>
+				<p>Emitted when game data is received.</p>
+				<a href="#handshake" id="handshake" style="color: inherit; text-decoration: none;">
+					<h4>handshake</h4>
+				</a>
+				<ul>
+					<li><code>(details: ConnectionDetails) =&gt; void</code></li>
+				</ul>
+				<p>Emitted for all handshake messages.</p>
+				<a href="#statuschange" id="statuschange" style="color: inherit; text-decoration: none;">
+					<h4>statusChange</h4>
+				</a>
+				<ul>
+					<li><code>(status: ConnectionStatus) =&gt; void</code></li>
+				</ul>
+				<p>Emitted whenever the connection status changes.</p>
+				<a href="#types" id="types" style="color: inherit; text-decoration: none;">
+					<h3>Types</h3>
+				</a>
+				<a href="#codeconnectionsettingscode" id="codeconnectionsettingscode" style="color: inherit; text-decoration: none;">
+					<h4><code>ConnectionSettings</code></h4>
+				</a>
+				<table>
+					<thead>
+						<tr>
+							<th>Key</th>
+							<th>Type</th>
+						</tr>
+					</thead>
+					<tbody><tr>
+							<td><code>ipAddress</code></td>
+							<td>string</td>
+						</tr>
+						<tr>
+							<td><code>port</code></td>
+							<td>number</td>
+						</tr>
+				</tbody></table>
+				<a href="#codeconnectiondetailscode" id="codeconnectiondetailscode" style="color: inherit; text-decoration: none;">
+					<h4><code>ConnectionDetails</code></h4>
+				</a>
+				<table>
+					<thead>
+						<tr>
+							<th>Key</th>
+							<th>Type</th>
+						</tr>
+					</thead>
+					<tbody><tr>
+							<td><code>consoleNickname</code></td>
+							<td>string</td>
+						</tr>
+						<tr>
+							<td><code>gameDataCursor</code></td>
+							<td>Uint8Array</td>
+						</tr>
+						<tr>
+							<td><code>version</code></td>
+							<td>string</td>
+						</tr>
+						<tr>
+							<td><code>clientToken</code></td>
+							<td>number</td>
+						</tr>
+				</tbody></table>
+				<a href="#codeconnectionstatuscode" id="codeconnectionstatuscode" style="color: inherit; text-decoration: none;">
+					<h4><code>ConnectionStatus</code></h4>
+				</a>
+				<p>A number representing the current connection status. Possible values are as follows:</p>
+				<table>
+					<thead>
+						<tr>
+							<th>Value</th>
+							<th>Status</th>
+						</tr>
+					</thead>
+					<tbody><tr>
+							<td>0</td>
+							<td>Disconnected</td>
+						</tr>
+						<tr>
+							<td>1</td>
+							<td>Connecting</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>Connected</td>
+						</tr>
+						<tr>
+							<td>3</td>
+							<td>Reconnecting</td>
+						</tr>
+				</tbody></table>
+				<a href="#development" id="development" style="color: inherit; text-decoration: none;">
+					<h2>Development</h2>
+				</a>
+				<p>To build the library from source:</p>
+				<pre><code class="language-bash">yarn run build</code></pre>
+				<p>To start the development server:</p>
+				<pre><code class="language-bash">yarn run watch</code></pre>
+				<a href="#acknowledgements" id="acknowledgements" style="color: inherit; text-decoration: none;">
+					<h2>Acknowledgements</h2>
+				</a>
+				<p>This library is largely taken from code available in the <a href="https://github.com/project-slippi/slippi-desktop-app"><code>slippi-desktop-app</code></a>. Credits to <a href="https://github.com/JLaferri">Jas Laferriere</a> and the rest of the <a href="https://github.com/project-slippi">Project Slippi</a> team.</p>
+				<a href="#license" id="license" style="color: inherit; text-decoration: none;">
+					<h2>License</h2>
+				</a>
+				<p>This software is released under the terms of <a href="LICENSE">LGPL-3.0</a> license.</p>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">

@@ -71,16 +71,22 @@
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
 						<p>Responsible for maintaining connection to a Slippi relay connection or Wii connection.
-						Events are emitted whenever data is received. See [[ConsoleConnectionEvents]] for all available events.</p>
+						Events are emitted whenever data is received.</p>
 					</div>
 					<p>Basic usage example:</p>
-					<pre><code class="language-ts"><span class="hljs-keyword">import</span> { ConsoleConnection } <span class="hljs-keyword">from</span> <span class="hljs-string">'slp-wii-connect'</span>;
+					<pre><code class="language-javascript"><span class="hljs-keyword">const</span> { ConsoleConnection } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@vinceau/slp-wii-connect"</span>);
 
-<span class="hljs-keyword">const</span> connection = ConsoleConnection();
-connection.on(<span class="hljs-string">'data'</span>, <span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> {
-  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`received data: <span class="hljs-subst">${data}</span>`</span>);
+<span class="hljs-keyword">const</span> connection = <span class="hljs-keyword">new</span> ConsoleConnection();
+connection.connect(address, port);
+
+connection.on(<span class="hljs-string">"data"</span>, (data) =&gt; {
+  <span class="hljs-comment">// Received data from console</span>
+  <span class="hljs-built_in">console</span>.log(data);
 });
-connection.connect(<span class="hljs-string">'123.34.56.78'</span>, <span class="hljs-number">666</span>);</code></pre>
+
+connection.on(<span class="hljs-string">"statusChange"</span>, (status) =&gt; {
+  <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`status changed: <span class="hljs-subst">${status}</span>`</span>);
+});</code></pre>
 				</div>
 			</section>
 			<section class="tsd-panel tsd-type-parameters">
@@ -140,7 +146,6 @@ connection.connect(<span class="hljs-string">'123.34.56.78'</span>, <span class=
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_connection_.consoleconnection.html#getdetails" class="tsd-kind-icon">get<wbr>Details</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_connection_.consoleconnection.html#getsettings" class="tsd-kind-icon">get<wbr>Settings</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_connection_.consoleconnection.html#getstatus" class="tsd-kind-icon">get<wbr>Status</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_connection_.consoleconnection.html#updatesettings" class="tsd-kind-icon">update<wbr>Settings</a></li>
 							</ul>
 						</section>
 					</div>
@@ -158,7 +163,7 @@ connection.connect(<span class="hljs-string">'123.34.56.78'</span>, <span class=
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/cfd6a14/src/console/connection.ts#L83">connection.ts:83</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/6bdaa81/src/console/connection.ts#L89">connection.ts:89</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="_connection_.consoleconnection.html" class="tsd-signature-type">ConsoleConnection</a></h4>
@@ -214,7 +219,7 @@ connection.connect(<span class="hljs-string">'123.34.56.78'</span>, <span class=
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/cfd6a14/src/console/connection.ts#L133">connection.ts:133</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/6bdaa81/src/console/connection.ts#L129">connection.ts:129</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -258,7 +263,7 @@ connection.connect(<span class="hljs-string">'123.34.56.78'</span>, <span class=
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/cfd6a14/src/console/connection.ts#L235">connection.ts:235</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/6bdaa81/src/console/connection.ts#L231">connection.ts:231</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -280,7 +285,7 @@ connection.connect(<span class="hljs-string">'123.34.56.78'</span>, <span class=
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/cfd6a14/src/console/connection.ts#L112">connection.ts:112</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/6bdaa81/src/console/connection.ts#L118">connection.ts:118</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -300,7 +305,7 @@ connection.connect(<span class="hljs-string">'123.34.56.78'</span>, <span class=
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/cfd6a14/src/console/connection.ts#L102">connection.ts:102</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/6bdaa81/src/console/connection.ts#L108">connection.ts:108</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -320,42 +325,13 @@ connection.connect(<span class="hljs-string">'123.34.56.78'</span>, <span class=
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/cfd6a14/src/console/connection.ts#L95">connection.ts:95</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/6bdaa81/src/console/connection.ts#L101">connection.ts:101</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 							</div>
 							<h4 class="tsd-returns-title">Returns <a href="../enums/_connection_.connectionstatus.html" class="tsd-signature-type">ConnectionStatus</a></h4>
 							<p>The current connection status.</p>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
-					<a name="updatesettings" class="tsd-anchor"></a>
-					<h3>update<wbr>Settings</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">update<wbr>Settings<span class="tsd-signature-symbol">(</span>newSettings<span class="tsd-signature-symbol">: </span><a href="../interfaces/_connection_.connectionsettings.html" class="tsd-signature-type">ConnectionSettings</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/cfd6a14/src/console/connection.ts#L120">connection.ts:120</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Updates the IP address and port of the connection.
-									This only takes effect the next time <a href="_connection_.consoleconnection.html#connect">connect</a> is called.</p>
-								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>newSettings: <a href="../interfaces/_connection_.connectionsettings.html" class="tsd-signature-type">ConnectionSettings</a></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -408,9 +384,6 @@ connection.connect(<span class="hljs-string">'123.34.56.78'</span>, <span class=
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="_connection_.consoleconnection.html#getstatus" class="tsd-kind-icon">get<wbr>Status</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_connection_.consoleconnection.html#updatesettings" class="tsd-kind-icon">update<wbr>Settings</a>
 							</li>
 						</ul>
 					</li>
