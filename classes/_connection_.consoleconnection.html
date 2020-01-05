@@ -77,7 +77,7 @@
 					<pre><code class="language-javascript"><span class="hljs-keyword">const</span> { ConsoleConnection } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@vinceau/slp-wii-connect"</span>);
 
 <span class="hljs-keyword">const</span> connection = <span class="hljs-keyword">new</span> ConsoleConnection();
-connection.connect(address, port);
+connection.connect(<span class="hljs-string">"localhost"</span>, <span class="hljs-number">667</span>); <span class="hljs-comment">// You should set these values appropriately</span>
 
 connection.on(<span class="hljs-string">"data"</span>, (data) =&gt; {
   <span class="hljs-comment">// Received data from console</span>
@@ -163,7 +163,7 @@ connection.on(<span class="hljs-string">"statusChange"</span>, (status) =&gt; {
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/6bdaa81/src/console/connection.ts#L89">connection.ts:89</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/0b4947b/src/console/connection.ts#L89">connection.ts:89</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="_connection_.consoleconnection.html" class="tsd-signature-type">ConsoleConnection</a></h4>
@@ -219,7 +219,7 @@ connection.on(<span class="hljs-string">"statusChange"</span>, (status) =&gt; {
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/6bdaa81/src/console/connection.ts#L129">connection.ts:129</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/0b4947b/src/console/connection.ts#L129">connection.ts:129</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -263,7 +263,7 @@ connection.on(<span class="hljs-string">"statusChange"</span>, (status) =&gt; {
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/6bdaa81/src/console/connection.ts#L231">connection.ts:231</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/0b4947b/src/console/connection.ts#L231">connection.ts:231</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -285,7 +285,7 @@ connection.on(<span class="hljs-string">"statusChange"</span>, (status) =&gt; {
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/6bdaa81/src/console/connection.ts#L118">connection.ts:118</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/0b4947b/src/console/connection.ts#L118">connection.ts:118</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -305,7 +305,7 @@ connection.on(<span class="hljs-string">"statusChange"</span>, (status) =&gt; {
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/6bdaa81/src/console/connection.ts#L108">connection.ts:108</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/0b4947b/src/console/connection.ts#L108">connection.ts:108</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -325,7 +325,7 @@ connection.on(<span class="hljs-string">"statusChange"</span>, (status) =&gt; {
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/6bdaa81/src/console/connection.ts#L101">connection.ts:101</a></li>
+									<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/0b4947b/src/console/connection.ts#L101">connection.ts:101</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
