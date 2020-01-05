@@ -145,10 +145,9 @@ export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEm
       host: this.ipAddress,
       port: this.port,
     }, () => {
-      console.log(`Connected to ${this.ipAddress}:${this.port}!`);
+      // console.log(`Instantiated connection to ${this.ipAddress}:${this.port}!`);
       clearTimeout(this.connectionRetryState.reconnectHandler);
       this._resetRetryState();
-      this._setStatus(ConnectionStatus.CONNECTED);
 
       const handshakeMsgOut = consoleComms.genHandshakeOut(
         this.connDetails.gameDataCursor, this.connDetails.clientToken
@@ -168,7 +167,8 @@ export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEm
     client.on('data', (data) => {
       if (commState === CommunicationState.INITIAL) {
         commState = this._getInitialCommState(data);
-        console.log(`Connected to source with type: ${commState}`);
+        console.log(`Connected to ${this.ipAddress}:${this.port} with type: ${commState}`);
+        this._setStatus(ConnectionStatus.CONNECTED);
         // console.log(data.toString("hex"));
       }
 
