@@ -15,8 +15,19 @@ Extract raw [Slippi](https://github.com/project-slippi/project-slippi) data dire
 * [Usage](#usage)
 * [API](#api)
   * [Methods](#methods)
+    * [connect](#connectip-port-timeout)
+    * [disconnect](#disconnect)
+    * [getStatus](#getstatus)
+    * [getSettings](#getsettings)
+    * [getDetails](#getdetails)
   * [Events](#events)
+    * [data](#data)
+    * [handshake](#handshake)
+    * [statusChange](#statuschange)
   * [Types](#types)
+    * [ConnectionSettings](#connectionsettings)
+    * [ConnectionDetails](#connectiondetails)
+    * [ConnectionStatus](#connectionstatus)
 * [Development](#development)
 * [Acknowledgements](#acknowledgements)
 * [License](#license)
@@ -91,16 +102,15 @@ Terminates the existing connection.
 
 #### `getStatus()`
 
-Returns the current connection status.
+Returns [`ConnectionStatus`](#connectionstatus).
 
 #### `getSettings()`
 
-Returns the IP address and port of the current connection.
+Returns [`ConnectionSettings`](#connectionsettings).
 
 #### `getDetails()`
 
-Returns the details of the connection. Information such as the console nickname, game data cursor, version, and client token are returned.
-
+Returns [`ConnectionDetails`](#connectiondetails).
 
 ### Events
 
