@@ -169,7 +169,7 @@ export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEm
       if (commState === CommunicationState.INITIAL) {
         commState = this._getInitialCommState(data);
         console.log(`Connected to source with type: ${commState}`);
-        console.log(data.toString("hex"));
+        // console.log(data.toString("hex"));
       }
 
       if (commState === CommunicationState.LEGACY) {
