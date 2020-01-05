@@ -114,16 +114,6 @@ export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEm
   }
 
   /**
-   * Updates the IP address and port of the connection.
-   * This only takes effect the next time [[connect]] is called.
-   */
-  public updateSettings(newSettings: ConnectionSettings): void {
-    // If data is not provided, keep old values
-    this.ipAddress = newSettings.ipAddress || this.ipAddress;
-    this.port = newSettings.port || this.port;
-  }
-
-  /**
    * Initiate a connection to the Wii or Slippi relay.
    * @param ip   The IP address of the Wii or Slippi relay.
    * @param port The port to connect to.
