@@ -60,18 +60,24 @@ interface ConsoleConnectionEventEmitter {
 
 /**
  * Responsible for maintaining connection to a Slippi relay connection or Wii connection.
- * Events are emitted whenever data is received. See [[ConsoleConnectionEvents]] for all available events.
+ * Events are emitted whenever data is received.
  *
  * Basic usage example:
  *
- * ```ts
- * import { ConsoleConnection } from 'slp-wii-connect';
+ * ```javascript
+ * const { ConsoleConnection } = require("@vinceau/slp-wii-connect");
  *
- * const connection = ConsoleConnection();
- * connection.on('data', (data) => {
- *   console.log(`received data: ${data}`);
+ * const connection = new ConsoleConnection();
+ * connection.connect(address, port);
+ *
+ * connection.on("data", (data) => {
+ *   // Received data from console
+ *   console.log(data);
  * });
- * connection.connect('123.34.56.78', 666);
+ *
+ * connection.on("statusChange", (status) => {
+ *   console.log(`status changed: ${status}`);
+ * });
  * ```
  */
 export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEmitter) {
@@ -111,16 +117,6 @@ export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEm
    */
   public getDetails(): ConnectionDetails {
     return this.connDetails;
-  }
-
-  /**
-   * Updates the IP address and port of the connection.
-   * This only takes effect the next time [[connect]] is called.
-   */
-  public updateSettings(newSettings: ConnectionSettings): void {
-    // If data is not provided, keep old values
-    this.ipAddress = newSettings.ipAddress || this.ipAddress;
-    this.port = newSettings.port || this.port;
   }
 
   /**

@@ -31,7 +31,8 @@
     "postpublish": "git push origin master --follow-tags",
     "build": "rollup -c",
     "watch": "rollup -cw",
-    "docs": "yarn typedoc && touch docs/.nojekyll"
+    "docs": "yarn typedoc",
+    "postdocs": "touch docs/.nojekyll"
   },
   "jest": {
     "testRegex": "/test/.*",
