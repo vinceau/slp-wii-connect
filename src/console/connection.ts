@@ -68,7 +68,7 @@ interface ConsoleConnectionEventEmitter {
  * const { ConsoleConnection } = require("@vinceau/slp-wii-connect");
  *
  * const connection = new ConsoleConnection();
- * connection.connect(address, port);
+ * connection.connect("localhost", 667); // You should set these values appropriately
  *
  * connection.on("data", (data) => {
  *   // Received data from console
