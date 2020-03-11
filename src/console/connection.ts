@@ -1,13 +1,18 @@
 import net from 'net';
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import StrictEventEmitter from 'strict-event-emitter-types';
 
 import { ConsoleCommunication, CommunicationType, CommunicationMessage } from './communication';
 
 const DEFAULT_CONNECTION_TIMEOUT_MS = 5000;
 const DEFAULT_IP = "0.0.0.0";
 const DEFAULT_PORT = 666;
+
+export enum ConnectionEvent {
+  HANDSHAKE = "handshake",
+  STATUS_CHANGE = "statusChange",
+  DATA = "data"
+}
 
 export enum ConnectionStatus {
   DISCONNECTED = 0,
@@ -47,17 +52,6 @@ const defaultConnectionDetails: ConnectionDetails = {
   clientToken: 0,
 }
 
-
-interface ConsoleConnectionEvents {
-  handshake: ConnectionDetails;
-  statusChange: ConnectionStatus;
-  data: Uint8Array;
-}
-
-interface ConsoleConnectionEventEmitter {
-  new(): StrictEventEmitter<EventEmitter, ConsoleConnectionEvents>;
-};
-
 /**
  * Responsible for maintaining connection to a Slippi relay connection or Wii connection.
  * Events are emitted whenever data is received.
@@ -80,7 +74,7 @@ interface ConsoleConnectionEventEmitter {
  * });
  * ```
  */
-export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEmitter) {
+export class ConsoleConnection extends EventEmitter {
   private ipAddress: string;
   private port: number;
   private connectionStatus = ConnectionStatus.DISCONNECTED;
@@ -283,7 +277,7 @@ export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEm
       this.connDetails.consoleNickname = message.payload.nick;
       const tokenBuf = Buffer.from(message.payload.clientToken as any);
       this.connDetails.clientToken = tokenBuf.readUInt32BE(0);;
-      this.emit("handshake", this.connDetails);
+      this.emit(ConnectionEvent.HANDSHAKE, this.connDetails);
       break;
     default:
       // Should this be an error?
@@ -292,12 +286,12 @@ export class ConsoleConnection extends (EventEmitter as ConsoleConnectionEventEm
   }
 
   private _handleReplayData(data: Uint8Array): void {
-    this.emit("data", data);
+    this.emit(ConnectionEvent.DATA, data);
   }
 
   private _setStatus(status: ConnectionStatus): void {
     this.connectionStatus = status;
-    this.emit("statusChange", this.connectionStatus);
+    this.emit(ConnectionEvent.STATUS_CHANGE, this.connectionStatus);
   }
 
   private _resetRetryState(): void {
