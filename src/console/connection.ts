@@ -1,6 +1,5 @@
 import net from 'net';
 import { EventEmitter } from 'events';
-import _ from 'lodash';
 
 import { ConsoleCommunication, CommunicationType, CommunicationMessage } from './communication';
 
@@ -177,7 +176,7 @@ export class ConsoleConnection extends EventEmitter {
       const messages = consoleComms.getMessages();
 
       // Process all of the received messages
-      _.forEach(messages, message => this._processMessage(message));
+      messages.forEach(message => this._processMessage(message));
     });
 
     client.on('timeout', () => {
