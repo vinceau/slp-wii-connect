@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>ConnectionStatus | @vinceau/slp-wii-connect - v1.0.2</title>
+	<title>ConnectionEvent | @vinceau/slp-wii-connect - v1.0.2</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -57,10 +57,10 @@
 					<a href="../modules/_connection_.html">&quot;connection&quot;</a>
 				</li>
 				<li>
-					<a href="_connection_.connectionstatus.html">ConnectionStatus</a>
+					<a href="_connection_.connectionevent.html">ConnectionEvent</a>
 				</li>
 			</ul>
-			<h1>Enumeration ConnectionStatus</h1>
+			<h1>Enumeration ConnectionEvent</h1>
 		</div>
 	</div>
 </header>
@@ -74,10 +74,9 @@
 						<section class="tsd-index-section ">
 							<h3>Enumeration members</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="_connection_.connectionstatus.html#connected" class="tsd-kind-icon">CONNECTED</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="_connection_.connectionstatus.html#connecting" class="tsd-kind-icon">CONNECTING</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="_connection_.connectionstatus.html#disconnected" class="tsd-kind-icon">DISCONNECTED</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="_connection_.connectionstatus.html#reconnecting" class="tsd-kind-icon">RECONNECTING</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="_connection_.connectionevent.html#data" class="tsd-kind-icon">DATA</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="_connection_.connectionevent.html#handshake" class="tsd-kind-icon">HANDSHAKE</a></li>
+								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="_connection_.connectionevent.html#status_change" class="tsd-kind-icon">STATUS_<wbr>CHANGE</a></li>
 							</ul>
 						</section>
 					</div>
@@ -86,42 +85,32 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Enumeration members</h2>
 				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="connected" class="tsd-anchor"></a>
-					<h3>CONNECTED</h3>
-					<div class="tsd-signature tsd-kind-icon">CONNECTED<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;2</span></div>
+					<a name="data" class="tsd-anchor"></a>
+					<h3>DATA</h3>
+					<div class="tsd-signature tsd-kind-icon">DATA<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;data&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/1c02067/src/console/connection.ts#L19">src/console/connection.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/1c02067/src/console/connection.ts#L13">src/console/connection.ts:13</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="connecting" class="tsd-anchor"></a>
-					<h3>CONNECTING</h3>
-					<div class="tsd-signature tsd-kind-icon">CONNECTING<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;1</span></div>
+					<a name="handshake" class="tsd-anchor"></a>
+					<h3>HANDSHAKE</h3>
+					<div class="tsd-signature tsd-kind-icon">HANDSHAKE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;handshake&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/1c02067/src/console/connection.ts#L18">src/console/connection.ts:18</a></li>
+							<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/1c02067/src/console/connection.ts#L11">src/console/connection.ts:11</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="disconnected" class="tsd-anchor"></a>
-					<h3>DISCONNECTED</h3>
-					<div class="tsd-signature tsd-kind-icon">DISCONNECTED<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;0</span></div>
+					<a name="status_change" class="tsd-anchor"></a>
+					<h3>STATUS_<wbr>CHANGE</h3>
+					<div class="tsd-signature tsd-kind-icon">STATUS_<wbr>CHANGE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;&quot;statusChange&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/1c02067/src/console/connection.ts#L17">src/console/connection.ts:17</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="reconnecting" class="tsd-anchor"></a>
-					<h3>RECONNECTING</h3>
-					<div class="tsd-signature tsd-kind-icon">RECONNECTING<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> =&nbsp;3</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/1c02067/src/console/connection.ts#L20">src/console/connection.ts:20</a></li>
+							<li>Defined in <a href="https://github.com/vinceau/slp-wii-connect/blob/1c02067/src/console/connection.ts#L12">src/console/connection.ts:12</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -140,30 +129,27 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-					<li class=" tsd-kind-enum tsd-parent-kind-external-module">
-						<a href="_connection_.connectionevent.html" class="tsd-kind-icon">Connection<wbr>Event</a>
-					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-enum tsd-parent-kind-external-module">
-						<a href="_connection_.connectionstatus.html" class="tsd-kind-icon">Connection<wbr>Status</a>
+						<a href="_connection_.connectionevent.html" class="tsd-kind-icon">Connection<wbr>Event</a>
 						<ul>
 							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="_connection_.connectionstatus.html#connected" class="tsd-kind-icon">CONNECTED</a>
+								<a href="_connection_.connectionevent.html#data" class="tsd-kind-icon">DATA</a>
 							</li>
 							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="_connection_.connectionstatus.html#connecting" class="tsd-kind-icon">CONNECTING</a>
+								<a href="_connection_.connectionevent.html#handshake" class="tsd-kind-icon">HANDSHAKE</a>
 							</li>
 							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="_connection_.connectionstatus.html#disconnected" class="tsd-kind-icon">DISCONNECTED</a>
-							</li>
-							<li class=" tsd-kind-enum-member tsd-parent-kind-enum">
-								<a href="_connection_.connectionstatus.html#reconnecting" class="tsd-kind-icon">RECONNECTING</a>
+								<a href="_connection_.connectionevent.html#status_change" class="tsd-kind-icon">STATUS_<wbr>CHANGE</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
+					<li class=" tsd-kind-enum tsd-parent-kind-external-module">
+						<a href="_connection_.connectionstatus.html" class="tsd-kind-icon">Connection<wbr>Status</a>
+					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-external-module">
 						<a href="../classes/_connection_.consoleconnection.html" class="tsd-kind-icon">Console<wbr>Connection</a>
 					</li>
