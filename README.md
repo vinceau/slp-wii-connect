@@ -2,6 +2,7 @@
 
 [![npm version](http://img.shields.io/npm/v/@vinceau/slp-wii-connect.svg?style=flat)](https://npmjs.org/package/@vinceau/slp-wii-connect "View this project on npm")
 [![Build Status](https://github.com/vinceau/slp-wii-connect/workflows/build/badge.svg)](https://github.com/vinceau/slp-wii-connect/actions?workflow=build)
+[![License](https://img.shields.io/npm/l/@vinceau/slp-wii-connect)](https://github.com/vinceau/slp-wii-connect/blob/master/LICENSE)
 
 Extract raw [Slippi](https://github.com/project-slippi/project-slippi) data directly from the console or from a Slippi relay
 
